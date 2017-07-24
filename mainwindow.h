@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QLabel>
+#include <QPainter>
 using namespace std;
 
 namespace Ui {
@@ -24,17 +25,11 @@ class MainWindow : public QMainWindow
 public:
     state_e STATE = CLICK;
     QImage *image;
-    int img_anchor_x = 0;
-    int img_anchor_y = 0;
-    int img_width;
-    int img_height;
-    int press_x;
-    int press_y;
     static const int MAX_X = 600;
     static const int MAX_Y = 500;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void myMouseMoveEvent(int x, int y);
+    Ui::MainWindow *ui;
 
 
 private slots:
@@ -44,16 +39,33 @@ private slots:
 
     void on_open_img_clicked();
 
-private:
-    Ui::MainWindow *ui;
+
 };
 
 class ImgLabel : public QLabel
 {
-protected:
-    void mouseMoveEvent(QMouseEvent *event);
-    //void mousePressEvent(QMouseEvent *event);
-    //void mouseReleaseEvent(QMouseEvent *event);
+    public:
+        int img_anchor_x;
+        int img_anchor_y;
+        int img_width;
+        int img_height;
+        int press_x;
+        int press_y;
+        int release_x;
+        int release_y;
+        int cur_x;
+        int cur_y;
+        bool needDraw = false;
+        bool selectOver = false;
+
+    protected:
+        void mouseMoveEvent(QMouseEvent *event);
+        void mousePressEvent(QMouseEvent *event);
+        void mouseReleaseEvent(QMouseEvent *event);
+        void getCurXY(QMouseEvent *event);
+        void getRelativeXY(int px, int py, int * x, int * y);
+        void paintEvent(QPaintEvent *event);
+        bool inImg(int x, int y);
 };
 
 #endif // MAINWINDOW_H
