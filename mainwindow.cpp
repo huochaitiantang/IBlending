@@ -81,8 +81,40 @@ bool ImgLabel::inImg(int x, int y){
     else return true;
 }
 
+bool ImgLabel::validRect(){
+    if(minx >= img_anchor_x &&
+       maxx >= img_anchor_x &&
+       miny >= img_anchor_y &&
+       maxy >= img_anchor_y &&
+       minx < img_anchor_x + img_width &&
+       maxx < img_anchor_x + img_width &&
+       miny < img_anchor_y + img_height &&
+       maxy < img_anchor_y + img_height) return true;
+    else return false;
+}
+
+int ImgLabel::inRectLine(int x, int y){
+    if(inImg(x,y) == false || selectOver == false) return 0;
+    if(x == minx && y >= miny && y <= maxy) return 1;
+    if(x == maxx && y >= miny && y <= maxy) return 2;
+    if(y == miny && x >= minx && x <= maxx) return 3;
+    if(y == maxy && x >= minx && x <= maxx) return 4;
+    return 0;
+}
+
+
 void ImgLabel::mouseMoveEvent(QMouseEvent *event){
     getCurXY(event);
+    int tmp = inRectLine(cur_x,cur_y);
+    if(tmp == 1 || tmp == 2){
+        setCursor(Qt::SizeHorCursor);
+    }
+    else if(tmp == 3 || tmp == 4){
+        setCursor(Qt::SizeVerCursor);
+    }
+    else{
+        setCursor(Qt::ArrowCursor);
+    }
     int x,y;
     getRelativeXY(cur_x, cur_y, &x,&y);
     char ss[100];
@@ -91,48 +123,87 @@ void ImgLabel::mouseMoveEvent(QMouseEvent *event){
     s_main_window->ui->bottom_info->setText(qss);
     if(event->buttons() & Qt::LeftButton){
         needDraw = true;
+        if(stretch == 1){
+            minx = std::max(std::min(maxx,cur_x),img_anchor_x);
+            //maxx = std::max(maxx,cur_x);
+        }
+        else if(stretch == 2){
+            maxx = std::min(std::max(minx,cur_x),img_anchor_x + img_width);
+            //minx = std::min(minx,cur_x);
+        }
+        else if(stretch == 3){
+            miny = std::max(std::min(maxy,cur_y),img_anchor_y);
+            //maxy = std::max(maxy,cur_y);
+        }
+        else if(stretch == 4){
+            maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height);
+            //miny = std::min(miny,cur_y);
+        }
         update();
     }
 }
 
+
+
 void ImgLabel::mousePressEvent(QMouseEvent *event){
     cout << "Press mouse" << endl;
-    selectOver = false;
-    press_x = cur_x;
-    press_y = cur_y;
+    getCurXY(event);
+    int tmp = inRectLine(cur_x,cur_y);
+    if(tmp == 0){
+        selectOver = false;
+        press_x = cur_x;
+        press_y = cur_y;
+    }
+    else{
+        stretch = tmp;
+    }
+
 }
 
 void ImgLabel::mouseReleaseEvent(QMouseEvent *event){
     cout << "Release mouse" << endl;
     getCurXY(event);
-    int x,y;
-    getRelativeXY(cur_x, cur_y, &x, &y);
-    release_x = x + img_anchor_x;
-    release_y = y + img_anchor_y;
-    selectOver = true;
-    needDraw = true;
-    update();
+    setCursor(Qt::ArrowCursor);
+    if(stretch > 0){
+        stretch = 0;
+    }
+    else{
+        int x,y;
+        getRelativeXY(cur_x, cur_y, &x, &y);
+        release_x = x + img_anchor_x;
+        release_y = y + img_anchor_y;
+        if(inImg(press_x,press_y))  selectOver = true;
+        //needDraw = true;
+        //update();
+    }
+    cout << "Over:" << selectOver
+         << " press: " << press_x
+         << " " << press_y
+         << " release:" << release_x
+         << " " << release_y << endl;
+
 }
 
 void ImgLabel::paintEvent(QPaintEvent *event)
 {
-
     QLabel::paintEvent(event);//先调用父类的paintEvent为了显示'背景'!!!
-    if(needDraw && inImg(press_x,press_y)){
-        int minx = std::max(std::min(press_x, cur_x), img_anchor_x);
-        int miny = std::max(std::min(press_y, cur_y), img_anchor_y);
-        int maxx = std::min(std::max(press_x, cur_x),img_anchor_x+img_width);
-        int maxy = std::min(std::max(press_y, cur_y),img_anchor_y+img_height);
+    if(stretch > 0 || selectOver){
         QPainter painter(this);
         painter.setPen(QPen(Qt::green,1));
         painter.drawRect(QRect(minx, miny, maxx-minx, maxy-miny));
-        needDraw = false;
+        cout << "draw.... " << minx << " " << miny << " " << maxx << " " << maxy<< endl;
     }
-    if(selectOver && inImg(press_x,press_y)){
-        int minx = std::max(std::min(press_x, release_x), img_anchor_x);
-        int miny = std::max(std::min(press_y, release_y), img_anchor_y);
-        int maxx = std::min(std::max(press_x, release_x),img_anchor_x+img_width);
-        int maxy = std::min(std::max(press_y, release_y),img_anchor_y+img_height);
+    else if(needDraw&&inImg(press_x,press_y)){
+        int final_x = cur_x;
+        int final_y = cur_y;
+        if(selectOver){
+            final_x = release_x;
+            final_y = release_y;
+        }
+        minx = std::max(std::min(press_x, final_x), img_anchor_x);
+        miny = std::max(std::min(press_y, final_y), img_anchor_y);
+        maxx = std::min(std::max(press_x, final_x),img_anchor_x+img_width);
+        maxy = std::min(std::max(press_y, final_y),img_anchor_y+img_height);
         QPainter painter(this);
         painter.setPen(QPen(Qt::green,1));
         painter.drawRect(QRect(minx, miny, maxx-minx, maxy-miny));

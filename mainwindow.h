@@ -45,18 +45,15 @@ private slots:
 class ImgLabel : public QLabel
 {
     public:
-        int img_anchor_x;
-        int img_anchor_y;
-        int img_width;
-        int img_height;
-        int press_x;
-        int press_y;
-        int release_x;
-        int release_y;
-        int cur_x;
-        int cur_y;
+        int img_anchor_x, img_anchor_y;
+        int img_width, img_height;
+        int press_x, press_y;
+        int release_x, release_y;
+        int cur_x, cur_y;
+        int minx, miny, maxx, maxy;
         bool needDraw = false;
         bool selectOver = false;
+        int stretch = 0;
 
     protected:
         void mouseMoveEvent(QMouseEvent *event);
@@ -66,6 +63,8 @@ class ImgLabel : public QLabel
         void getRelativeXY(int px, int py, int * x, int * y);
         void paintEvent(QPaintEvent *event);
         bool inImg(int x, int y);
+        int inRectLine(int x, int y);
+        bool validRect();
 };
 
 #endif // MAINWINDOW_H
