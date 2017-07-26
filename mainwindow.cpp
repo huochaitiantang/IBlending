@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     s_main_window = this;
+    desimglabel = new DesImgLabel();
+    imglabel = new ImgLabel();
     ui->setupUi(this);
 }
 
@@ -31,7 +33,8 @@ void MainWindow::on_chose_clicked()
 }
 
 void MainWindow::on_open_img_clicked(){
-    imglabel = new ImgLabel();
+    imglabel->selectOver = false;
+    //imglabel->needDraw = false;
     imglabel->image = new QImage;
     QString filename;
     filename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
@@ -60,7 +63,7 @@ void MainWindow::on_open_img_clicked(){
 }
 
 void MainWindow::on_des_open_img_clicked(){
-    desimglabel = new DesImgLabel();
+    desimglabel->hasSubImg = false;
     desimglabel->image = new QImage;
     QString filename;
     filename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
@@ -93,8 +96,8 @@ void MainWindow::on_select_ok_clicked(){
     if(imglabel->selectOver == false) return;
     if(desimglabel->hasImg == false) return;
     desimglabel->hasSubImg = true;
-    desimglabel->subx = desimglabel->img_anchor_x;
-    desimglabel->suby = desimglabel->img_anchor_y;
+    desimglabel->subx = 0;
+    desimglabel->suby = 0;
 
     cout << " format: " << imglabel->image->format() << endl;
     int imgx = imglabel->minx - imglabel->img_anchor_x;
@@ -294,13 +297,17 @@ void ImgLabel::paintEvent(QPaintEvent *event)
 }
 
 void DesImgLabel::paintEvent(QPaintEvent *event){
+    QLabel::paintEvent(event);
     if(hasSubImg == false){
-        QLabel::paintEvent(event);
         return;
     }
     if(image->format() != subimage->format()){
         cout << "format not matched!" << endl;
         return ;
+    }
+    if(subimage->width() > image->width() || subimage->height() > image->height()){
+        hasSubImg = false;
+        return;
     }
     QImage * DImg = new QImage(image->width(),image->height(),image->format());
     QRgb *Bigrow;
@@ -318,6 +325,7 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
             }
         }
     }
+    this->setPixmap(QPixmap::fromImage(*DImg));
 
 }
 
