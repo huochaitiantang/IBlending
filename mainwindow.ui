@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1300</width>
     <height>662</height>
    </rect>
   </property>
@@ -51,7 +51,7 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>191</width>
+      <width>121</width>
       <height>25</height>
      </rect>
     </property>
@@ -90,12 +90,74 @@
      <rect>
       <x>20</x>
       <y>560</y>
-      <width>601</width>
+      <width>600</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
      <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QScrollArea" name="des_img_area">
+    <property name="geometry">
+     <rect>
+      <x>629</x>
+      <y>59</y>
+      <width>600</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>598</width>
+       <height>498</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="des_bottom_info">
+    <property name="geometry">
+     <rect>
+      <x>629</x>
+      <y>560</y>
+      <width>600</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="des_open_img">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>30</y>
+      <width>121</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>open des img</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="select_ok">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>30</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>select</string>
     </property>
    </widget>
   </widget>
@@ -104,7 +166,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1300</width>
      <height>25</height>
     </rect>
    </property>
