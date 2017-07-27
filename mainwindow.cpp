@@ -3,6 +3,7 @@
 #include <iostream>
 
 static MainWindow* s_main_window;
+static int cookie = 1;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -36,12 +37,11 @@ void MainWindow::on_open_img_clicked(){
     imglabel->selectOver = false;
     //imglabel->needDraw = false;
     imglabel->image = new QImage;
-    QString filename;
-    filename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
-    if(filename.isEmpty()){
+    imglabel->filename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
+    if(imglabel->filename.isEmpty()){
         return;
     }
-     if(! ( imglabel->image->load(filename) ) ){
+     if(! ( imglabel->image->load(imglabel->filename) ) ){
         QMessageBox::information(this, tr("Open failed!"), tr("Open failed"));
         return;
      }
@@ -53,10 +53,20 @@ void MainWindow::on_open_img_clicked(){
      int w = imglabel->image->width();
      imglabel->img_height = h;
      imglabel->img_width = w;
-     if(h < MAX_Y)  imglabel->img_anchor_y = (MAX_Y - h)/2;
+     if(h < MAX_Y)  {
+         imglabel->img_anchor_y = (MAX_Y - h)/2;
+         if( w >= MAX_X) imglabel->img_anchor_y -= 10;
+     }
      else   imglabel->img_anchor_y = 0;
-     if(w < MAX_X)  imglabel->img_anchor_x = (MAX_X - w)/2;
+     if(w < MAX_X)  {
+         imglabel->img_anchor_x = (MAX_X - w)/2;
+         if(h >= MAX_Y) {
+             imglabel->img_anchor_x -= 10;
+         }
+     }
      else imglabel->img_anchor_x = 0;
+     //imglabel->resize(w,h);
+     cout << "anchor_img_x:" << imglabel->img_anchor_x << endl;
      ui->img_area->setWidget(imglabel);
      ui->img_area->setMaximumHeight(MAX_Y);
      ui->img_area->setMaximumWidth(MAX_X);
@@ -65,12 +75,11 @@ void MainWindow::on_open_img_clicked(){
 void MainWindow::on_des_open_img_clicked(){
     desimglabel->hasSubImg = false;
     desimglabel->image = new QImage;
-    QString filename;
-    filename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
-    if(filename.isEmpty()){
+    desimglabel->desfilename = QFileDialog::getOpenFileName(this, tr("Chose img"), "", tr("Images (*.png *.bmp *.jpg *.tif *.GIF )"));
+    if(desimglabel->desfilename.isEmpty()){
         return;
     }
-     if(! ( desimglabel->image->load(filename) ) ){
+     if(! ( desimglabel->image->load(desimglabel->desfilename) ) ){
         QMessageBox::information(this, tr("Open failed!"), tr("Open failed"));
         return;
      }
@@ -83,9 +92,15 @@ void MainWindow::on_des_open_img_clicked(){
      desimglabel->img_height = h;
      desimglabel->img_width = w;
      desimglabel->hasImg = true;
-     if(h < MAX_Y)  desimglabel->img_anchor_y = (MAX_Y - h)/2;
+     if(h < MAX_Y)  {
+         desimglabel->img_anchor_y = (MAX_Y - h)/2;
+         if(w >= MAX_X) desimglabel->img_anchor_y -= 10;
+     }
      else   desimglabel->img_anchor_y = 0;
-     if(w < MAX_X)  desimglabel->img_anchor_x = (MAX_X - w)/2;
+     if(w < MAX_X) {
+         desimglabel->img_anchor_x = (MAX_X - w)/2;
+         if( h >= MAX_Y) desimglabel->img_anchor_x -= 10;
+     }
      else desimglabel->img_anchor_x = 0;
      ui->des_img_area->setWidget(desimglabel);
      ui->des_img_area->setMaximumHeight(MAX_Y);
@@ -98,12 +113,14 @@ void MainWindow::on_select_ok_clicked(){
     desimglabel->hasSubImg = true;
     desimglabel->subx = 0;
     desimglabel->suby = 0;
+    //desimglabel->scale_x = 1.0;
+    //desimglabel->scale_y = 1.0;
 
     cout << " format: " << imglabel->image->format() << endl;
     int imgx = imglabel->minx - imglabel->img_anchor_x;
     int imgy = imglabel->miny - imglabel->img_anchor_y;
-    int w = imglabel->maxx - imglabel->minx;
-    int h = imglabel->maxy - imglabel->miny;
+    int w = imglabel->maxx - imglabel->minx + 1;
+    int h = imglabel->maxy - imglabel->miny + 1;
     desimglabel->subw = w;
     desimglabel->subh = h;
 
@@ -114,7 +131,54 @@ void MainWindow::on_select_ok_clicked(){
             desimglabel->subimage->setPixel(x-imgx,y-imgy,rowData[x]);
         }
     }
+    desimglabel->needDraw = true;
     desimglabel->update();
+}
+
+void MainWindow::on_poisson_clicked(){
+    if(desimglabel->hasSubImg == false || desimglabel->hasImg == false) return;
+    QImage *srcImg = new QImage;
+    *srcImg = desimglabel->subimage->scaled(desimglabel->subw,
+                                            desimglabel->subh,
+                                            Qt::IgnoreAspectRatio);
+    Mat src, des, ans;
+    vector<Mat> src_v;
+    vector<Mat> des_v;
+    vector<Mat> ans_v;
+    src = QImage2cvMat(srcImg);
+    des = QImage2cvMat(desimglabel->image);
+    split(src, src_v);
+    split(des,des_v);
+    if(src_v.size() == 4) src_v.pop_back();
+    if(des_v.size() == 4) des_v.pop_back();
+    merge(src_v, src);
+    merge(des_v,des);
+    // 0 FR; 1 Normal Clone; 2 Mixed Clone
+    ans = getPoissonMat(des, src, Rect(desimglabel->subx,
+                                 desimglabel->suby,
+                                 desimglabel->subw,
+                                 desimglabel->subh), 1);
+    split(ans,ans_v);
+    Mat whiteC = 255 * Mat::ones(ans_v[0].rows, ans_v[0].cols, ans_v[0].depth());
+    ans_v.push_back(whiteC);
+    merge(ans_v,ans);
+    imshow("ans",ans);
+    *(desimglabel->image) = cvMat2QImage(ans);
+    desimglabel->hasSubImg = false;
+    desimglabel->needDraw = true;
+    desimglabel->setPixmap(QPixmap::fromImage(*desimglabel->image));
+    desimglabel->update();
+}
+
+void MainWindow::on_save_img_clicked(){
+    char ss[128];
+    String fs1 = getPureName(imglabel->filename.toStdString());
+    String fs2 = getPureName(desimglabel->desfilename.toStdString());
+    const char* s1 = fs1.c_str();
+    const char* s2 = fs2.c_str();
+    sprintf(ss,"%s_%s_%d.jpg",s1,s2,cookie++);
+    cout << ss << endl;
+    desimglabel->image->save(ss);
 }
 
 void ImgLabel::getCurXY(QMouseEvent *event){
@@ -182,6 +246,20 @@ int ImgLabel::inRectLine(int x, int y){
     return 0;
 }
 
+int DesImgLabel::inRectLine(int x, int y){
+    if(inImg(x,y) == false || hasSubImg == false) return 0;
+    int x1 = subx + img_anchor_x;
+    int y1 = suby + img_anchor_y;
+    int x2 = x1 + subw - 1;
+    int y2 = y1 + subh - 1;
+    if(x > x1 && y > y1 && x < x2 && y < y2) return 5;
+    else if(x == x1 && y >= y1 && y <= y2) return 1;
+    else if(x == x2 && y >= y1 && y <= y2) return 2;
+    else if(y == y1 && x >= x1 && x <= x2) return 3;
+    else if(y == y2 && x >= x1 && x <= x2) return 4;
+    else return 0;
+}
+
 
 void ImgLabel::mouseMoveEvent(QMouseEvent *event){
     getCurXY(event);
@@ -207,13 +285,13 @@ void ImgLabel::mouseMoveEvent(QMouseEvent *event){
             minx = std::max(std::min(maxx,cur_x),img_anchor_x);
         }
         else if(stretch == 2){
-            maxx = std::min(std::max(minx,cur_x),img_anchor_x + img_width);
+            maxx = std::min(std::max(minx,cur_x),img_anchor_x + img_width - 1);
         }
         else if(stretch == 3){
             miny = std::max(std::min(maxy,cur_y),img_anchor_y);
         }
         else if(stretch == 4){
-            maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height);
+            maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height - 1);
         }
         update();
     }
@@ -221,12 +299,39 @@ void ImgLabel::mouseMoveEvent(QMouseEvent *event){
 
 void DesImgLabel::mouseMoveEvent(QMouseEvent *event){
     getCurXY(event);
+    int tmp = inRectLine(cur_x, cur_y);
+    if(tmp == 1 || tmp == 2) setCursor(Qt::SizeHorCursor);
+    else if(tmp == 3 || tmp == 4) setCursor(Qt::SizeVerCursor);
+    else if(tmp == 5) setCursor(Qt::OpenHandCursor);
+    else setCursor(Qt::ArrowCursor);
     int x,y;
     getRelativeXY(cur_x, cur_y, &x,&y);
     char ss[100];
     sprintf(ss,"x=%d, y=%d", x, y);
     QString qss(ss);
     s_main_window->ui->des_bottom_info->setText(qss);
+    if(event->buttons() & Qt::LeftButton){
+        needDraw = true;
+        if(stretch == 5){
+            subx = std::max(std::min(x - move_anchor_x, img_width - subw ), 0);
+            suby = std::max(std::min(y - move_anchor_y, img_height - subh ), 0);
+        }
+        else if(stretch == 1 && x < subx + subimage->width()){
+            subw =  subw + subx - x;
+            subx = x;
+        }
+        else if(stretch == 2 && x > subx){
+            subw = x - subx;
+        }
+        else if(stretch == 3 && y < suby + subimage->height()){
+            subh = subh + suby - y;
+            suby = y;
+        }
+        else if(stretch == 4 && y > suby){
+            subh = y - suby;
+        }
+        update();
+    }
 }
 
 
@@ -245,8 +350,17 @@ void ImgLabel::mousePressEvent(QMouseEvent *event){
 
 }
 
+void DesImgLabel::mousePressEvent(QMouseEvent *event){
+    getCurXY(event);
+    int tmp = inRectLine(cur_x,cur_y);
+    stretch = tmp;
+    if(stretch == 5){
+        move_anchor_x = cur_x - img_anchor_x - subx;
+        move_anchor_y = cur_y - img_anchor_y - suby;
+    }
+}
+
 void ImgLabel::mouseReleaseEvent(QMouseEvent *event){
-    cout << "Release mouse" << endl;
     getCurXY(event);
     setCursor(Qt::ArrowCursor);
     if(stretch > 0){
@@ -258,15 +372,13 @@ void ImgLabel::mouseReleaseEvent(QMouseEvent *event){
         release_x = x + img_anchor_x;
         release_y = y + img_anchor_y;
         if(inImg(press_x,press_y))  selectOver = true;
-        //needDraw = true;
-        //update();
     }
-    cout << "Over:" << selectOver
-         << " press: " << press_x
-         << " " << press_y
-         << " release:" << release_x
-         << " " << release_y << endl;
+}
 
+void DesImgLabel::mouseReleaseEvent(QMouseEvent *event){
+    getCurXY(event);
+    setCursor(Qt::ArrowCursor);
+    if(stretch > 0) stretch = 0;
 }
 
 void ImgLabel::paintEvent(QPaintEvent *event)
@@ -275,8 +387,8 @@ void ImgLabel::paintEvent(QPaintEvent *event)
     if(stretch > 0 || selectOver){
         QPainter painter(this);
         painter.setPen(QPen(Qt::green,1));
-        painter.drawRect(QRect(minx, miny, maxx-minx, maxy-miny));
-        cout << "draw.... " << minx << " " << miny << " " << maxx << " " << maxy<< endl;
+        painter.drawRect(QRect(minx, miny, maxx-minx+1, maxy-miny+1));
+        //cout << "draw.... " << minx << " " << miny << " " << maxx << " " << maxy<< endl;
     }
     else if(needDraw&&inImg(press_x,press_y)){
         int final_x = cur_x;
@@ -287,18 +399,19 @@ void ImgLabel::paintEvent(QPaintEvent *event)
         }
         minx = std::max(std::min(press_x, final_x), img_anchor_x);
         miny = std::max(std::min(press_y, final_y), img_anchor_y);
-        maxx = std::min(std::max(press_x, final_x),img_anchor_x+img_width);
-        maxy = std::min(std::max(press_y, final_y),img_anchor_y+img_height);
+        maxx = std::min(std::max(press_x, final_x),img_anchor_x+img_width-1);
+        maxy = std::min(std::max(press_y, final_y),img_anchor_y+img_height-1);
         QPainter painter(this);
         painter.setPen(QPen(Qt::green,1));
-        painter.drawRect(QRect(minx, miny, maxx-minx, maxy-miny));
+        painter.drawRect(QRect(minx, miny, maxx-minx+1, maxy-miny+1));
         needDraw = false;
     }
 }
 
 void DesImgLabel::paintEvent(QPaintEvent *event){
     QLabel::paintEvent(event);
-    if(hasSubImg == false){
+    //cout << "Heool:" << needDraw << endl;
+    if(hasSubImg == false || needDraw == false){
         return;
     }
     if(image->format() != subimage->format()){
@@ -310,12 +423,16 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
         return;
     }
     QImage * DImg = new QImage(image->width(),image->height(),image->format());
+    QImage * scaleImg = new QImage;
+    *scaleImg = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
+    //cout << " " << subimage->width() << " " << subimage->height() << " "
+    //     << " " << scaleImg->width() << " " << scaleImg->height() << endl;
     QRgb *Bigrow;
     QRgb *Smlrow;
     for(int y = 0; y < img_height; y++){
         Bigrow = (QRgb*)image->scanLine(y);
         bool yok = ((y >= suby)&&(y < suby + subh));
-        if(yok) Smlrow = (QRgb*)subimage->scanLine(y - suby);
+        if(yok) Smlrow = (QRgb*)scaleImg->scanLine(y - suby);
         for(int x = 0; x < img_width; x++){
             if( yok && x >= subx && x < subx + subw){
                 DImg->setPixel(x, y, Smlrow[x - subx]);
@@ -325,7 +442,88 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
             }
         }
     }
-    this->setPixmap(QPixmap::fromImage(*DImg));
+
+    this->setPixmap(QPixmap::fromImage(*DImg)); //can trigger paintevent too, needDraw can stop repeat
+//    QPainter painter(this);
+//    painter.setPen(QPen(Qt::green,10));
+//    painter.drawRect(QRect(subx + img_anchor_x, suby + img_anchor_y, subw, subh));
+    needDraw = false;
+}
+
+
+QImage cvMat2QImage(const Mat& mat)
+{
+    // 8-bits unsigned, NO. OF CHANNELS = 1
+    if(mat.type() == CV_8UC1)
+    {
+        QImage image(mat.cols, mat.rows, QImage::Format_Indexed8);
+        // Set the color table (used to translate colour indexes to qRgb values)
+        image.setColorCount(256);
+        for(int i = 0; i < 256; i++)
+        {
+            image.setColor(i, qRgb(i, i, i));
+        }
+        // Copy input Mat
+        uchar *pSrc = mat.data;
+        for(int row = 0; row < mat.rows; row ++)
+        {
+            uchar *pDest = image.scanLine(row);
+            memcpy(pDest, pSrc, mat.cols);
+            pSrc += mat.step;
+        }
+        return image;
+    }
+    // 8-bits unsigned, NO. OF CHANNELS = 3
+    else if(mat.type() == CV_8UC3)
+    {
+        // Copy input Mat
+        const uchar *pSrc = (const uchar*)mat.data;
+        // Create QImage with same dimensions as input Mat
+        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+        return image.rgbSwapped();
+    }
+    else if(mat.type() == CV_8UC4)
+    {
+        //qDebug() << "CV_8UC4";
+        // Copy input Mat
+        const uchar *pSrc = (const uchar*)mat.data;
+        // Create QImage with same dimensions as input Mat
+        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_RGB32);
+        return image.copy();
+    }
+    else
+    {
+        //qDebug() << "ERROR: Mat could not be converted to QImage.";
+        return QImage();
+    }
+}
+Mat QImage2cvMat(QImage *image)
+{
+    Mat mat;
+    switch(image->format())
+    {
+    case QImage::Format_ARGB32:
+    case QImage::Format_RGB32:
+    case QImage::Format_ARGB32_Premultiplied:
+        mat = Mat(image->height(), image->width(), CV_8UC4, (void*)image->constBits(), image->bytesPerLine());
+        //cout << "Format_ARGB" << endl;
+        break;
+    case QImage::Format_RGB888:
+        mat = Mat(image->height(), image->width(), CV_8UC3, (void*)image->constBits(), image->bytesPerLine());
+        cv::cvtColor(mat, mat, CV_BGR2RGB);
+        break;
+    case QImage::Format_Indexed8:
+        mat = Mat(image->height(), image->width(), CV_8UC1, (void*)image->constBits(), image->bytesPerLine());
+        break;
+    }
+    return mat;
+}
+
+String getPureName(String s){
+    int begin = s.rfind('/');
+    int end = s.rfind('.');
+    String ans = s.substr(begin+1, end-begin-1);
+    return ans;
 
 }
 

@@ -4,6 +4,24 @@
 #
 #-------------------------------------------------
 
+INCLUDEPATH += /home/sensetime/libs/include
+#INCLUDEPATH += /home/sensetime/gradient_fusion
+
+LIBS += -L/home/sensetime/libs/lib
+# add down error!!!!
+# -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_photo -lopencv_imgcodecs
+LIBS += /home/sensetime/gradient_fusion/lmath.o \
+        /home/sensetime/gradient_fusion/poisson.o \
+        /home/sensetime/gradient_fusion/tools.o \
+        /home/sensetime/gradient_fusion/test.o \
+        /home/sensetime/gradient_fusion/api.o \
+        /home/sensetime/libs/lib/libopencv_core.so \
+        /home/sensetime/libs/lib/libopencv_imgproc.so \
+        /home/sensetime/libs/lib/libopencv_highgui.so \
+        /home/sensetime/libs/lib/libopencv_imgcodecs.so \
+        /home/sensetime/libs/lib/libopencv_photo.so \
+
+
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -32,3 +50,6 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+
+
