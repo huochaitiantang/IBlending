@@ -253,10 +253,14 @@ int DesImgLabel::inRectLine(int x, int y){
     int x2 = x1 + subw - 1;
     int y2 = y1 + subh - 1;
     if(x > x1 && y > y1 && x < x2 && y < y2) return 5;
-    else if(x == x1 && y >= y1 && y <= y2) return 1;
-    else if(x == x2 && y >= y1 && y <= y2) return 2;
-    else if(y == y1 && x >= x1 && x <= x2) return 3;
-    else if(y == y2 && x >= x1 && x <= x2) return 4;
+    else if(x == x1 && y > y1 && y < y2) return 1;
+    else if(x == x2 && y > y1 && y < y2) return 2;
+    else if(y == y1 && x > x1 && x < x2) return 3;
+    else if(y == y2 && x > x1 && x < x2) return 4;
+    else if(x == x1 && y == y1) return 6;
+    else if(x == x1 && y == y2) return 7;
+    else if(x == x2 && y == y1) return 8;
+    else if(x == x2 && y == y2) return 9;
     else return 0;
 }
 
@@ -303,6 +307,8 @@ void DesImgLabel::mouseMoveEvent(QMouseEvent *event){
     if(tmp == 1 || tmp == 2) setCursor(Qt::SizeHorCursor);
     else if(tmp == 3 || tmp == 4) setCursor(Qt::SizeVerCursor);
     else if(tmp == 5) setCursor(Qt::OpenHandCursor);
+    else if(tmp == 6 || tmp == 9) setCursor(Qt::SizeFDiagCursor);
+    else if(tmp == 7 || tmp == 8) setCursor(Qt::SizeBDiagCursor);
     else setCursor(Qt::ArrowCursor);
     int x,y;
     getRelativeXY(cur_x, cur_y, &x,&y);
@@ -316,18 +322,38 @@ void DesImgLabel::mouseMoveEvent(QMouseEvent *event){
             subx = std::max(std::min(x - move_anchor_x, img_width - subw ), 0);
             suby = std::max(std::min(y - move_anchor_y, img_height - subh ), 0);
         }
-        else if(stretch == 1 && x < subx + subimage->width()){
+        else if(stretch == 1 && x < subx + subw){
             subw =  subw + subx - x;
             subx = x;
         }
         else if(stretch == 2 && x > subx){
             subw = x - subx;
         }
-        else if(stretch == 3 && y < suby + subimage->height()){
+        else if(stretch == 3 && y < suby + subh){
             subh = subh + suby - y;
             suby = y;
         }
         else if(stretch == 4 && y > suby){
+            subh = y - suby;
+        }
+        else if(stretch == 6 && x < subx + subw && y < suby + subh){
+            subw = subw + subx - x;
+            subx = x;
+            subh = subh + suby - y;
+            suby = y;
+        }
+        else if(stretch == 7 && x < subx + subw && y > suby){
+            subw = subw + subx - x;
+            subx = x;
+            subh = y - suby;
+        }
+        else if(stretch == 8 && x > subx && y < suby + subh){
+            subw = x - subx;
+            subh = subh + suby - y;
+            suby = y;
+        }
+        else if(stretch == 9 && x > subx && y > suby){
+            subw = x - subx;
             subh = y - suby;
         }
         update();

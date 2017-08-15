@@ -9,11 +9,6 @@
 #include <QPainter>
 
 #include "../gradient_fusion/common.hpp"
-//#include <opencv2/core.hpp>
-//#include <opencv2/highgui.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include <opencv2/photo.hpp>
 
 using namespace std;
 using namespace cv;
