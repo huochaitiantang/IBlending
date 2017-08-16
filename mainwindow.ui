@@ -17,36 +17,7 @@
    <property name="mouseTracking">
     <bool>true</bool>
    </property>
-   <widget class="QRadioButton" name="click">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>71</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Click</string>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="chose">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>0</y>
-      <width>71</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Chose</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="open_img">
+   <widget class="QPushButton" name="open_src_img">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -59,10 +30,10 @@
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>open image</string>
+     <string>open src img</string>
     </property>
    </widget>
-   <widget class="QScrollArea" name="img_area">
+   <widget class="QScrollArea" name="src_img_area">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -85,7 +56,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QLabel" name="bottom_info">
+   <widget class="QLabel" name="src_bottom_info">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -134,7 +105,7 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="des_open_img">
+   <widget class="QPushButton" name="open_des_img">
     <property name="geometry">
      <rect>
       <x>630</x>
