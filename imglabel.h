@@ -11,7 +11,7 @@
 
 static const int MAX_X = 600;
 static const int MAX_Y = 500;
-
+static const int MOUSE_GAP = 1;
 class ImgLabel : public QLabel
 {
     public:

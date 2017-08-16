@@ -37,15 +37,36 @@ int DesImgLabel::inRectLine(int x, int y){
     int y1 = suby + img_anchor_y;
     int x2 = x1 + subw - 1;
     int y2 = y1 + subh - 1;
-    if(x > x1 && y > y1 && x < x2 && y < y2) return 5;
-    else if(x == x1 && y > y1 && y < y2) return 1;
-    else if(x == x2 && y > y1 && y < y2) return 2;
-    else if(y == y1 && x > x1 && x < x2) return 3;
-    else if(y == y2 && x > x1 && x < x2) return 4;
-    else if(x == x1 && y == y1) return 6;
-    else if(x == x1 && y == y2) return 7;
-    else if(x == x2 && y == y1) return 8;
-    else if(x == x2 && y == y2) return 9;
+    if(x > x1 + MOUSE_GAP && y > y1 + MOUSE_GAP &&
+       x < x2 - MOUSE_GAP && y < y2 - MOUSE_GAP) return 5;
+    else if(x >= x1 - MOUSE_GAP && x <= x1 + MOUSE_GAP &&
+            y >= y1 - MOUSE_GAP && y <= y1 + MOUSE_GAP){
+        return 6;
+    }
+    else if(x >= x1 - MOUSE_GAP && x <= x1 + MOUSE_GAP &&
+            y >= y2 - MOUSE_GAP && y <= y2 + MOUSE_GAP){
+        return 7;
+    }
+    else if(x >= x2 - MOUSE_GAP && x <= x2 + MOUSE_GAP &&
+            y >= y1 - MOUSE_GAP && y <= y1 + MOUSE_GAP){
+        return 8;
+    }
+    else if(x >= x2 - MOUSE_GAP && x <= x2 + MOUSE_GAP &&
+            y >= y2 - MOUSE_GAP && y <= y2 + MOUSE_GAP){
+        return 9;
+    }
+    else if(x >= x1 - MOUSE_GAP && x <= x1 + MOUSE_GAP && y > y1 && y < y2){
+        return 1;
+    }
+    else if(x >= x2 - MOUSE_GAP && x <= x2 + MOUSE_GAP && y > y1 && y < y2){
+        return 2;
+    }
+    else if(y >= y1 - MOUSE_GAP && y <= y1 + MOUSE_GAP && x > x1 && x < x2) {
+        return 3;
+    }
+    else if(y >= y2 - MOUSE_GAP && y <= y2 + MOUSE_GAP && x > x1 && x < x2) {
+        return 4;
+    }
     else return 0;
 }
 

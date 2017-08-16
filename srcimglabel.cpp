@@ -2,25 +2,45 @@
 
 int SrcImgLabel::inRectLine(int x, int y){
     if(inImg(x,y) == false || selectOver == false) return 0;
-    if(x == minx && y >= miny && y <= maxy) return 1;
-    if(x == maxx && y >= miny && y <= maxy) return 2;
-    if(y == miny && x >= minx && x <= maxx) return 3;
-    if(y == maxy && x >= minx && x <= maxx) return 4;
+    else if(x >= minx - MOUSE_GAP && x <= minx + MOUSE_GAP &&
+            y >= miny - MOUSE_GAP && y <= miny + MOUSE_GAP){
+        return 6;
+    }
+    else if(x >= minx - MOUSE_GAP && x <= minx + MOUSE_GAP &&
+            y >= maxy - MOUSE_GAP && y <= maxy + MOUSE_GAP){
+        return 7;
+    }
+    else if(x >= maxx - MOUSE_GAP && x <= maxx + MOUSE_GAP &&
+            y >= miny - MOUSE_GAP && y <= miny + MOUSE_GAP){
+        return 8;
+    }
+    else if(x >= maxx - MOUSE_GAP && x <= maxx + MOUSE_GAP &&
+            y >= maxy - MOUSE_GAP && y <= maxy + MOUSE_GAP){
+        return 9;
+    }
+    else if(x >= minx - MOUSE_GAP && x <= minx + MOUSE_GAP && y > miny && y < maxy){
+        return 1;
+    }
+    else if(x >= maxx - MOUSE_GAP && x <= maxx + MOUSE_GAP && y > miny && y < maxy){
+        return 2;
+    }
+    else if(y >= miny - MOUSE_GAP && y <= miny + MOUSE_GAP && x > minx && x < maxx){
+        return 3;
+    }
+    else if(y >= maxy - MOUSE_GAP && y <= maxy + MOUSE_GAP && x > minx && x < maxx){
+        return 4;
+    }
     return 0;
 }
 
 void SrcImgLabel::mouseMoveEvent(QMouseEvent *event){
     getCurXY(event);
     int tmp = inRectLine(cur_x,cur_y);
-    if(tmp == 1 || tmp == 2){
-        setCursor(Qt::SizeHorCursor);
-    }
-    else if(tmp == 3 || tmp == 4){
-        setCursor(Qt::SizeVerCursor);
-    }
-    else{
-        setCursor(Qt::ArrowCursor);
-    }
+    if(tmp == 1 || tmp == 2) setCursor(Qt::SizeHorCursor);
+    else if(tmp == 3 || tmp == 4) setCursor(Qt::SizeVerCursor);
+    else if(tmp == 6 || tmp == 9) setCursor(Qt::SizeFDiagCursor);
+    else if(tmp == 7 || tmp == 8) setCursor(Qt::SizeBDiagCursor);
+    else setCursor(Qt::ArrowCursor);
     int x,y;
     getRelativeXY(cur_x, cur_y, &x,&y);
     char ss[100];
@@ -39,6 +59,22 @@ void SrcImgLabel::mouseMoveEvent(QMouseEvent *event){
             miny = std::max(std::min(maxy,cur_y),img_anchor_y);
         }
         else if(stretch == 4){
+            maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height - 1);
+        }
+        else if(stretch == 6){
+            minx = std::max(std::min(maxx,cur_x),img_anchor_x);
+            miny = std::max(std::min(maxy,cur_y),img_anchor_y);
+        }
+        else if(stretch == 7){
+            minx = std::max(std::min(maxx,cur_x),img_anchor_x);
+            maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height - 1);
+        }
+        else if(stretch == 8){
+            maxx = std::min(std::max(minx,cur_x),img_anchor_x + img_width - 1);
+            miny = std::max(std::min(maxy,cur_y),img_anchor_y);
+        }
+        else if(stretch == 9){
+            maxx = std::min(std::max(minx,cur_x),img_anchor_x + img_width - 1);
             maxy = std::min(std::max(miny,cur_y),img_anchor_y + img_height - 1);
         }
         update();
