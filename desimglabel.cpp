@@ -31,6 +31,23 @@ void DesImgLabel::poisson(){
     this->update();
 }
 
+void DesImgLabel::save_img(char s[]){
+    QString filename = QFileDialog::getSaveFileName(this,
+            tr("Save Image"),
+            s,
+            tr(" *.jpg;; *.png;; *.bmp;; *.tif;; *.GIF"));
+    if (filename.isEmpty()){
+       return;
+    }
+    QImage * save_img = this->image;
+    if(this->hasSubImg) save_img = getDisplayImage();
+    if(!(save_img->save(filename))){
+        QMessageBox::information(this,
+            tr("Save the image"),
+            tr("Failed to save the image!"));
+    }
+}
+
 int DesImgLabel::inRectLine(int x, int y){
     if(inImg(x,y) == false || hasSubImg == false) return 0;
     int x1 = subx + img_anchor_x;
@@ -145,25 +162,10 @@ void DesImgLabel::mouseReleaseEvent(QMouseEvent *event){
     if(stretch > 0) stretch = 0;
 }
 
-void DesImgLabel::paintEvent(QPaintEvent *event){
-    QLabel::paintEvent(event);
-    //cout << "Heool:" << needDraw << endl;
-    if(hasSubImg == false || needDraw == false){
-        return;
-    }
-    if(image->format() != subimage->format()){
-        cout << "format not matched!" << endl;
-        return ;
-    }
-    if(subimage->width() > image->width() || subimage->height() > image->height()){
-        hasSubImg = false;
-        return;
-    }
+QImage * DesImgLabel::getDisplayImage(){
     QImage * DImg = new QImage(image->width(),image->height(),image->format());
     QImage * scaleImg = new QImage;
     *scaleImg = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
-    //cout << " " << subimage->width() << " " << subimage->height() << " "
-    //     << " " << scaleImg->width() << " " << scaleImg->height() << endl;
     QRgb *Bigrow;
     QRgb *Smlrow;
     for(int y = 0; y < img_height; y++){
@@ -179,10 +181,28 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
             }
         }
     }
+    return DImg;
+}
 
+void DesImgLabel::paintEvent(QPaintEvent *event){
+    QLabel::paintEvent(event);
+    if(hasSubImg == false || needDraw == false){
+        return;
+    }
+    if(image->format() != subimage->format()){
+        return ;
+    }
+    if(subimage->width() > image->width() || subimage->height() > image->height()){
+        hasSubImg = false;
+        return;
+    }
+    QImage * DImg = getDisplayImage();
     this->setPixmap(QPixmap::fromImage(*DImg)); //can trigger paintevent too, needDraw can stop repeat
 //    QPainter painter(this);
 //    painter.setPen(QPen(Qt::green,10));
 //    painter.drawRect(QRect(subx + img_anchor_x, suby + img_anchor_y, subw, subh));
     needDraw = false;
 }
+
+
+

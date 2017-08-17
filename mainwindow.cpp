@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "util.h"
 
-static int cookie = 1;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -55,14 +54,14 @@ void MainWindow::on_poisson_clicked(){
 }
 
 void MainWindow::on_save_img_clicked(){
+    if(!desimglabel || !desimglabel->hasImg) return;
     char ss[128];
     string fs1 = getPureName(srcimglabel->filename.toStdString());
     string fs2 = getPureName(desimglabel->filename.toStdString());
     const char* s1 = fs1.c_str();
     const char* s2 = fs2.c_str();
-    sprintf(ss,"%s_%s_%d.jpg",s1,s2,cookie++);
-    printf("save img [ %s ]\n",ss);
-    desimglabel->image->save(ss);
+    sprintf(ss,"%s_%s.jpg",s1,s2);
+    desimglabel->save_img(ss);
 }
 
 

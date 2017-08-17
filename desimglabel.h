@@ -11,11 +11,13 @@ class DesImgLabel : public ImgLabel
         bool hasSubImg = false;
         int subx, suby;
         int subw, subh;
-        void poisson();
         DesImgLabel(QLabel *info):ImgLabel(info){}
+        void poisson();
+        void save_img(char s[]);
 
     protected:
         int inRectLine(int x, int y);
+        QImage * getDisplayImage();
         void mouseMoveEvent(QMouseEvent *event);
         void mousePressEvent(QMouseEvent *event);
         void mouseReleaseEvent(QMouseEvent *event);
