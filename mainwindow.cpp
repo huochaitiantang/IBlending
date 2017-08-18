@@ -64,6 +64,18 @@ void MainWindow::on_save_img_clicked(){
     desimglabel->save_img(ss);
 }
 
+void MainWindow::on_backward_clicked(){
+    desimglabel->forward_backward(-1);
+}
+
+void MainWindow::on_forward_clicked(){
+    desimglabel->forward_backward(1);
+}
+
+void MainWindow::on_clear_roi_clicked(){
+    desimglabel->hasSubImg = false;
+    desimglabel->setPixmap(QPixmap::fromImage(*(desimglabel->image)));
+}
 
 
 

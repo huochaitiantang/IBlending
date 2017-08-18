@@ -24,11 +24,26 @@ void DesImgLabel::poisson(){
     ans_v.push_back(whiteC);
     merge(ans_v,ans);
     //imshow("ans",ans);
-    *(this->image) = cvMat2QImage(ans);
+    desimg_t cur_old, cur_new;
+    while(img_buf_index < img_buf.size() - 1) img_buf.pop_back();
+    cur_old.img = image;
+    cur_old.subimg = subimage;
+    cur_old.withsub = true;
+    cur_old.x = subx;
+    cur_old.y = suby;
+    cur_old.w = subw;
+    cur_old.h = subh;
+    img_buf.push_back(cur_old);
+    image = new QImage();
+    *image = cvMat2QImage(ans);
+    cur_new.img = image;
+    cur_new.withsub = false;
+    img_buf.push_back(cur_new);
+    img_buf_index += 2;
+
     this->hasSubImg = false;
     this->needDraw = true;
-    this->setPixmap(QPixmap::fromImage(*this->image));
-    this->update();
+    this->setPixmap(QPixmap::fromImage(*image));
 }
 
 void DesImgLabel::save_img(char s[]){
@@ -46,6 +61,16 @@ void DesImgLabel::save_img(char s[]){
             tr("Save the image"),
             tr("Failed to save the image!"));
     }
+}
+
+void DesImgLabel::open_img(QScrollArea *scroll_area){
+    ImgLabel::open_img(scroll_area);
+    img_buf.clear();
+    desimg_t cur;
+    cur.img = image;
+    cur.withsub = false;
+    img_buf.push_back(cur);
+    img_buf_index = 0;
 }
 
 int DesImgLabel::inRectLine(int x, int y){
@@ -204,5 +229,26 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
     needDraw = false;
 }
 
+void DesImgLabel::forward_backward(int offset){
+    if (offset != 1 && offset != -1) return;
+    int img_buf_size = img_buf.size();
+    int tmp = img_buf_index + offset;
+    if(tmp < 0 || tmp >= img_buf_size ) return;
+    image = img_buf[tmp].img;
+    hasSubImg = img_buf[tmp].withsub;
+    if(hasSubImg){
+        subimage = img_buf[tmp].subimg;
+        subx = img_buf[tmp].x;
+        suby = img_buf[tmp].y;
+        subw = img_buf[tmp].w;
+        subh = img_buf[tmp].h;
+        QImage * DImg = getDisplayImage();
+        this->setPixmap(QPixmap::fromImage(*DImg));
+    }
+    else{
+        this->setPixmap(QPixmap::fromImage(*image));
+    }
+    img_buf_index = tmp;
+}
 
 

@@ -26,6 +26,9 @@ private slots:
     void on_select_ok_clicked();
     void on_poisson_clicked();
     void on_save_img_clicked();
+    void on_backward_clicked();
+    void on_forward_clicked();
+    void on_clear_roi_clicked();
 };
 
 

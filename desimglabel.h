@@ -2,6 +2,14 @@
 #define DESIMGLABEL_H
 
 #include "imglabel.h"
+#include <vector>
+//for forward and backward
+typedef struct{
+    QImage * img;
+    QImage * subimg;
+    int x, y, w, h;
+    bool withsub;
+} desimg_t;
 
 class DesImgLabel : public ImgLabel
 {
@@ -11,9 +19,13 @@ class DesImgLabel : public ImgLabel
         bool hasSubImg = false;
         int subx, suby;
         int subw, subh;
+        std::vector<desimg_t> img_buf;
+        int img_buf_index;
         DesImgLabel(QLabel *info):ImgLabel(info){}
         void poisson();
         void save_img(char s[]);
+        void open_img(QScrollArea *scroll_area);
+        void forward_backward(int offset);
 
     protected:
         int inRectLine(int x, int y);

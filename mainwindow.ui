@@ -66,7 +66,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>x, y</string>
     </property>
    </widget>
    <widget class="QScrollArea" name="des_img_area">
@@ -102,7 +102,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>x, y</string>
     </property>
    </widget>
    <widget class="QPushButton" name="open_des_img">
@@ -147,7 +147,7 @@
    <widget class="QPushButton" name="save_img">
     <property name="geometry">
      <rect>
-      <x>860</x>
+      <x>1130</x>
       <y>30</y>
       <width>89</width>
       <height>25</height>
@@ -155,6 +155,45 @@
     </property>
     <property name="text">
      <string>save img</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="backward">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>30</y>
+      <width>81</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>backward</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="forward">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>30</y>
+      <width>71</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>forward</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clear_roi">
+    <property name="geometry">
+     <rect>
+      <x>1030</x>
+      <y>30</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>clear roi</string>
     </property>
    </widget>
   </widget>
