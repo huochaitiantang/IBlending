@@ -7,9 +7,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    editwindow = new EditWindow(0, this);
     srcimglabel = new SrcImgLabel(ui->src_bottom_info);
     desimglabel = new DesImgLabel(ui->des_bottom_info);
     this->adjust_widget();
+    connect(this->ui->actiongo_to_switch, SIGNAL(triggered()), this, SLOT(switch_to_edit()));
 }
 
 MainWindow::~MainWindow()
@@ -90,7 +92,7 @@ void MainWindow::adjust_widget(){
     srcimglabel->MAX_Y = MAX_Y;
     desimglabel->MAX_X = MAX_X;
     desimglabel->MAX_Y = MAX_Y;
-    std::cout << w << " " << h << " " << MAX_X << " " << MAX_Y << std::endl;
+    //std::cout << w << " " << h << " " << MAX_X << " " << MAX_Y << std::endl;
     this->ui->src_img_area->setGeometry(20, 40, MAX_X, MAX_Y);
     this->ui->des_img_area->setGeometry(20 + MAX_X, 40, MAX_X, MAX_Y);
     this->ui->src_bottom_info->setGeometry(20, 40 + MAX_Y, MAX_X, 20);
@@ -103,6 +105,10 @@ void MainWindow::adjust_widget(){
     this->ui->save_img->setGeometry(20 + MAX_X + 100 * 5, 10, 90, 25);
 }
 
+void MainWindow::switch_to_edit(){
+    this->hide();
+    this->editwindow->show();
+}
 
 
 

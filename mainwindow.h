@@ -5,6 +5,8 @@
 #include <QDesktopWidget>
 #include "srcimglabel.h"
 #include "desimglabel.h"
+class EditWindow;
+#include "editwindow.h"
 
 namespace Ui {
     class MainWindow;
@@ -20,6 +22,7 @@ public:
     Ui::MainWindow *ui;
     SrcImgLabel * srcimglabel;
     DesImgLabel * desimglabel;
+    EditWindow * editwindow;
 
 protected:
     void adjust_widget();
@@ -33,6 +36,7 @@ private slots:
     void on_backward_clicked();
     void on_forward_clicked();
     void on_clear_roi_clicked();
+    void switch_to_edit();
 };
 
 

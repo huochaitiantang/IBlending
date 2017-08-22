@@ -212,6 +212,13 @@
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menupoisson">
+    <property name="title">
+     <string>switch</string>
+    </property>
+    <addaction name="actiongo_to_switch"/>
+   </widget>
+   <addaction name="menupoisson"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -240,6 +247,21 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionpoisson">
+   <property name="text">
+    <string>poisson</string>
+   </property>
+  </action>
+  <action name="actionedit">
+   <property name="text">
+    <string>edit</string>
+   </property>
+  </action>
+  <action name="actiongo_to_switch">
+   <property name="text">
+    <string>go to edit</string>
    </property>
   </action>
  </widget>
