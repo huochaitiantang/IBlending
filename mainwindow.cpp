@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     srcimglabel = new SrcImgLabel(ui->src_bottom_info);
     desimglabel = new DesImgLabel(ui->des_bottom_info);
+    this->adjust_widget();
 }
 
 MainWindow::~MainWindow()
@@ -77,6 +78,30 @@ void MainWindow::on_clear_roi_clicked(){
     desimglabel->setPixmap(QPixmap::fromImage(*(desimglabel->image)));
 }
 
+void MainWindow::adjust_widget(){
+    QDesktopWidget* desktopWidget = QApplication::desktop();
+    QRect screenRect = desktopWidget->availableGeometry();
+    this->resize(QSize(screenRect.width(), screenRect.height()));
+    int w = this->width();
+    int h = this->height();
+    int MAX_X = std::max((w - 20 * 2)/2, srcimglabel->MAX_X);
+    int MAX_Y = std::max((h - 100), srcimglabel->MAX_Y);
+    srcimglabel->MAX_X = MAX_X;
+    srcimglabel->MAX_Y = MAX_Y;
+    desimglabel->MAX_X = MAX_X;
+    desimglabel->MAX_Y = MAX_Y;
+    std::cout << w << " " << h << " " << MAX_X << " " << MAX_Y << std::endl;
+    this->ui->src_img_area->setGeometry(20, 40, MAX_X, MAX_Y);
+    this->ui->des_img_area->setGeometry(20 + MAX_X, 40, MAX_X, MAX_Y);
+    this->ui->src_bottom_info->setGeometry(20, 40 + MAX_Y, MAX_X, 20);
+    this->ui->des_bottom_info->setGeometry(20 + MAX_X, 40 + MAX_Y, MAX_X, 20);
+    this->ui->open_des_img->setGeometry(20 + MAX_X + 100 * 0, 10, 90, 25);
+    this->ui->poisson->setGeometry(20 + MAX_X + 100 * 1, 10, 90, 25);
+    this->ui->backward->setGeometry(20 + MAX_X + 100 * 2, 10, 90, 25);
+    this->ui->forward->setGeometry(20 + MAX_X + 100 * 3, 10, 90, 25);
+    this->ui->clear_roi->setGeometry(20 + MAX_X + 100 * 4, 10, 90, 25);
+    this->ui->save_img->setGeometry(20 + MAX_X + 100 * 5, 10, 90, 25);
+}
 
 
 

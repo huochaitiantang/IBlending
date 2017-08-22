@@ -9,9 +9,8 @@
 #include <QPen>
 #include <QPainter>
 
-static const int MAX_X = 600;
-static const int MAX_Y = 500;
-static const int MOUSE_GAP = 1;
+
+static int MOUSE_GAP = 1;
 class ImgLabel : public QLabel
 {
     public:
@@ -26,6 +25,8 @@ class ImgLabel : public QLabel
         bool needDraw = false;
         int stretch = 0;
         bool hasImg = false;
+        int MAX_X = 600;
+        int MAX_Y = 500;
         void open_img(QScrollArea *scroll_area);
         ImgLabel(QLabel *info);
 

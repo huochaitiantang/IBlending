@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDesktopWidget>
 #include "srcimglabel.h"
 #include "desimglabel.h"
 
@@ -19,6 +20,9 @@ public:
     Ui::MainWindow *ui;
     SrcImgLabel * srcimglabel;
     DesImgLabel * desimglabel;
+
+protected:
+    void adjust_widget();
 
 private slots:
     void on_open_src_img_clicked();
