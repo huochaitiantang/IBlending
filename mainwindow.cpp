@@ -76,8 +76,10 @@ void MainWindow::on_forward_clicked(){
 }
 
 void MainWindow::on_clear_roi_clicked(){
-    desimglabel->hasSubImg = false;
-    desimglabel->setPixmap(QPixmap::fromImage(*(desimglabel->image)));
+    if(desimglabel->hasImg && desimglabel->hasSubImg){
+        desimglabel->hasSubImg = false;
+        desimglabel->setPixmap(QPixmap::fromImage(*(desimglabel->image)));
+    }
 }
 
 void MainWindow::adjust_widget(){
