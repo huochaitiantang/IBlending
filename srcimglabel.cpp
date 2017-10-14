@@ -1,5 +1,26 @@
 #include "srcimglabel.h"
 
+void SrcImgLabel::mouseMoveEvent(QMouseEvent *event){
+    if(SELECT_WAY == RECT) rectMouseMoveEvent(event);
+    else if(SELECT_WAY == POLY) polyMouseMoveEvent(event);
+}
+
+void SrcImgLabel::mousePressEvent(QMouseEvent *event){
+    if(SELECT_WAY == RECT) rectMousePressEvent(event);
+    else if(SELECT_WAY == POLY) polyMousePressEvent(event);
+}
+
+void SrcImgLabel::mouseReleaseEvent(QMouseEvent *event){
+    if(SELECT_WAY == RECT) rectMouseReleaseEvent(event);
+    else if(SELECT_WAY == POLY) polyMouseReleaseEvent(event);
+}
+
+void SrcImgLabel::paintEvent(QPaintEvent *event){
+    if(SELECT_WAY == RECT) rectPaintEvent(event);
+    else if(SELECT_WAY == POLY) polyPaintEvent(event);
+}
+
+
 int SrcImgLabel::inRectLine(int x, int y){
     if(inImg(x,y) == false || selectOver == false) return 0;
     else if(x >= minx - MOUSE_GAP && x <= minx + MOUSE_GAP &&
@@ -33,7 +54,7 @@ int SrcImgLabel::inRectLine(int x, int y){
     return 0;
 }
 
-void SrcImgLabel::mouseMoveEvent(QMouseEvent *event){
+void SrcImgLabel::rectMouseMoveEvent(QMouseEvent *event){
     getCurXY(event);
     int tmp = inRectLine(cur_x,cur_y);
     if(tmp == 1 || tmp == 2) setCursor(Qt::SizeHorCursor);
@@ -81,7 +102,7 @@ void SrcImgLabel::mouseMoveEvent(QMouseEvent *event){
     }
 }
 
-void SrcImgLabel::mousePressEvent(QMouseEvent *event){
+void SrcImgLabel::rectMousePressEvent(QMouseEvent *event){
     //cout << "Press mouse" << endl;
     getCurXY(event);
     int tmp = inRectLine(cur_x,cur_y);
@@ -96,7 +117,7 @@ void SrcImgLabel::mousePressEvent(QMouseEvent *event){
 }
 
 
-void SrcImgLabel::mouseReleaseEvent(QMouseEvent *event){
+void SrcImgLabel::rectMouseReleaseEvent(QMouseEvent *event){
     getCurXY(event);
     setCursor(Qt::ArrowCursor);
     if(stretch > 0){
@@ -111,7 +132,7 @@ void SrcImgLabel::mouseReleaseEvent(QMouseEvent *event){
     }
 }
 
-void SrcImgLabel::paintEvent(QPaintEvent *event)
+void SrcImgLabel::rectPaintEvent(QPaintEvent *event)
 {
     QLabel::paintEvent(event);//先调用父类的paintEvent为了显示'背景'!!!
     if(stretch > 0 || selectOver){
@@ -135,5 +156,85 @@ void SrcImgLabel::paintEvent(QPaintEvent *event)
         painter.setPen(QPen(Qt::green,1));
         painter.drawRect(QRect(minx, miny, maxx-minx+1, maxy-miny+1));
         needDraw = false;
+    }
+}
+
+void SrcImgLabel::clear_select(){
+    selectOver = false;
+    needDraw = false;
+    clearPolygon(&poly);
+    update();
+}
+
+void SrcImgLabel::polyMouseMoveEvent(QMouseEvent *event){
+    ImgLabel::mouseMoveEvent(event);
+    setCursor(Qt::ArrowCursor);
+    int siz = poly.x.size();
+    if(siz > 0 && selectOver == false && inImg(cur_x,cur_y)){
+        int fx = poly.x[0];
+        int fy = poly.y[0];
+        if(nearPoint(cur_x,cur_y,fx,fy) == true){
+            cur_x = fx;
+            cur_y = fy;
+            setCursor(Qt::CrossCursor);
+        }
+        if(canAddPointToPolygon(poly,cur_x,cur_y)){
+            needDraw = true;
+        }
+    }
+    update();
+}
+
+void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
+    //cout << "Press mouse" << endl;
+    getCurXY(event);
+    if(inImg(cur_x,cur_y) == false) return;
+    if(selectOver == true){
+        selectOver = false;
+        clearPolygon(&poly);
+    }
+    else{
+        if(poly.x.size() == 0){
+            addPointToPolygon(&poly,cur_x,cur_y);
+        }
+        else{
+            int fx = poly.x[0];
+            int fy = poly.y[0];
+            if(nearPoint(cur_x,cur_y,fx,fy) == true){
+                cur_x = fx;
+                cur_y = fy;
+            }
+            if(canAddPointToPolygon(poly,cur_x,cur_y)){
+                addPointToPolygon(&poly,cur_x,cur_y);
+                if(validPolygon(poly)){
+                    selectOver = true;
+                }
+            }
+        }
+        for(int i=0;i<poly.x.size();i++){
+            cout << poly.x[i] << "," << poly.y[i] << " ";
+        }
+        cout << endl;
+    }
+}
+
+void SrcImgLabel::polyMouseReleaseEvent(QMouseEvent *event){
+    return;
+}
+
+void SrcImgLabel::polyPaintEvent(QPaintEvent *event){
+    QLabel::paintEvent(event);//先调用父类的paintEvent为了显示'背景'!!!
+    QPainter painter(this);
+    painter.setPen(QPen(Qt::green,1));
+    int siz = poly.x.size();
+    for(int i=1; i<siz; i++){
+        painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(poly.x[i],poly.y[i]));
+    }
+    if(!needDraw){
+        painter.setPen(QPen(Qt::red,1));
+    }
+    needDraw = false;
+    if(selectOver == false && poly.x.size()>0){
+        painter.drawLine(QPoint(poly.x[siz-1],poly.y[siz-1]),QPoint(cur_x,cur_y));
     }
 }

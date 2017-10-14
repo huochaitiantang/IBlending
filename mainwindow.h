@@ -37,6 +37,8 @@ private slots:
     void on_forward_clicked();
     void on_clear_roi_clicked();
     void switch_to_edit();
+    void on_rect_clicked();
+    void on_poly_clicked();
 };
 
 

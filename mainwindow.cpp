@@ -12,6 +12,15 @@ MainWindow::MainWindow(QWidget *parent) :
     desimglabel = new DesImgLabel(ui->des_bottom_info);
     this->adjust_widget();
     connect(this->ui->actiongo_to_switch, SIGNAL(triggered()), this, SLOT(switch_to_edit()));
+
+    QButtonGroup *btgroup = new QButtonGroup(this);
+    btgroup->addButton(ui->rect);
+    btgroup->addButton(ui->poly);
+
+    connect(ui->rect, SIGNAL(clicked()), this, SLOT(on_rect_clicked()));
+    connect(ui->poly, SIGNAL(clicked()), this, SLOT(on_poly_clicked()));
+
+    srcimglabel->poly = createPolygon();
 }
 
 MainWindow::~MainWindow()
@@ -110,6 +119,16 @@ void MainWindow::adjust_widget(){
 void MainWindow::switch_to_edit(){
     this->hide();
     this->editwindow->show();
+}
+
+void MainWindow::on_rect_clicked(){
+    srcimglabel->SELECT_WAY = RECT;
+    srcimglabel->clear_select();
+}
+
+void MainWindow::on_poly_clicked(){
+    srcimglabel->SELECT_WAY = POLY;
+    srcimglabel->clear_select();
 }
 
 

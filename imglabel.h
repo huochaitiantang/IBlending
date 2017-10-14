@@ -8,9 +8,15 @@
 #include <QMessageBox>
 #include <QPen>
 #include <QPainter>
+#include <QButtonGroup>
+#include "util.h"
+
+typedef enum sw{
+    RECT,
+    POLY
+} select_way_e;
 
 
-static int MOUSE_GAP = 1;
 class ImgLabel : public QLabel
 {
     public:
@@ -29,6 +35,9 @@ class ImgLabel : public QLabel
         int MAX_Y = 500;
         void open_img(QScrollArea *scroll_area);
         ImgLabel(QLabel *info);
+        select_way_e SELECT_WAY = RECT;
+        polygon poly;
+
 
     protected:
         void getCurXY(QMouseEvent *event);

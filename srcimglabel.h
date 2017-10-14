@@ -9,6 +9,7 @@ class SrcImgLabel : public ImgLabel
         int minx, miny, maxx, maxy;
         bool selectOver = false;
         SrcImgLabel(QLabel *info):ImgLabel(info){}
+        void clear_select();
 
     protected:
         int inRectLine(int x, int y);
@@ -16,6 +17,16 @@ class SrcImgLabel : public ImgLabel
         void mousePressEvent(QMouseEvent *event);
         void mouseReleaseEvent(QMouseEvent *event);
         void paintEvent(QPaintEvent *event);
+
+        void rectMouseMoveEvent(QMouseEvent *event);
+        void rectMousePressEvent(QMouseEvent *event);
+        void rectMouseReleaseEvent(QMouseEvent *event);
+        void rectPaintEvent(QPaintEvent *event);
+
+        void polyMouseMoveEvent(QMouseEvent *event);
+        void polyMousePressEvent(QMouseEvent *event);
+        void polyMouseReleaseEvent(QMouseEvent *event);
+        void polyPaintEvent(QPaintEvent *event);
 
 };
 
