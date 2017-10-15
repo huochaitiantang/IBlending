@@ -286,7 +286,7 @@ void print_poly(polygon pg){
 double getIntersectX(int y, int x1, int y1, int x2, int y2){
     if(y == y1 && y1 == y2) return -1;
     if(x1 == x2) return x1;
-    return (x2-x1)*(y-y1)/(y2-y1)+x1 ;
+    return (double)(x2-x1)*(y-y1)/(y2-y1)+x1 ;
 }
 
 void getPolygonMask(polygon pg, int w, int h, vector<vector<int> > &msk){
@@ -306,16 +306,25 @@ void getPolygonMask(polygon pg, int w, int h, vector<vector<int> > &msk){
         for(int j = 1; j < siz; j++){
             if(segmentIntersect(0,i,w-1,i,pg.x[j-1],pg.y[j-1],pg.x[j],pg.y[j])){
                 double cur_x = getIntersectX(i,pg.x[j-1],pg.y[j-1],pg.x[j],pg.y[j]);
-                if(cur_x >= 0) inter_x.push_back(cur_x);
+                if(cur_x >= 0){
+                    //cross problem
+                    if(cur_x == (double)pg.x[j]){
+                        if(pg.y[j-1] < i){
+                            inter_x.push_back(cur_x);
+                        }
+                    }
+                    else if(cur_x == (double)pg.x[j-1]){
+                        if(pg.y[j] < i){
+                            inter_x.push_back(cur_x);
+                        }
+                    }
+                    else{
+                        inter_x.push_back(cur_x);
+                    }
+                }
             }
         }
-        for(int j = 0; j < inter_x.size(); j++){
-            cout << inter_x[j] << " ";
-        }
         sort(inter_x.begin(),inter_x.end());
-        for(int j = 0; j < inter_x.size(); j++){
-            cout << inter_x[j] << " ";
-        }
         for(int j = 0; j < inter_x.size(); j += 2){
             int st = (int)inter_x[j];
             int ed = (int)inter_x[j+1];
