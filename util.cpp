@@ -93,7 +93,7 @@ bool segmentIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, in
          && min(y3,y4)<=max(y1,y2)
          ) )
            return false;
-    int u,v,w,z;
+    double u,v,w,z;
     u=(x3-x1)*(y2-y1)-(x2-x1)*(y3-y1);
     v=(x4-x1)*(y2-y1)-(x2-x1)*(y4-y1);
     w=(x1-x3)*(y4-y3)-(x4-x3)*(y1-y3);
@@ -101,16 +101,48 @@ bool segmentIntersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, in
     return (u*v <= 0 && w*z <= 0);
 }
 
+bool nearPoint(int x,int y,int cx,int cy){
+    if(x >= cx - MOUSE_GAP && x <= cx + MOUSE_GAP &&
+       y >= cy - MOUSE_GAP && y <= cy + MOUSE_GAP) return true;
+    return false;
+}
+
+double modv(int x,int y){
+    return sqrt(x * x + y * y);
+}
+
+int mulv(int x1, int y1, int x2, int y2){
+    return (x1 * x2 + y1 * y2);
+}
+
+double pointDistanceSegment(int x, int y, int x1, int y1, int x2, int y2){
+    int x_ab = x2 - x1;
+    int y_ab = y2 - y1;
+    int x_ap = x - x1;
+    int y_ap = y - y1;
+    int x_bp = x - x2;
+    int y_bp = y - y2;
+    double ab = modv(x_ab, y_ab);
+    double ap = modv(x_ap, y_ap);
+    if(ap == 0) return ap;
+    double cos_bap = (double)mulv(x_ab,y_ab,x_ap,y_ap)/(ab * ap);
+    if(cos_bap <= 0) return ap;
+    double bp = modv(x_bp, y_bp);
+    if(bp == 0) return 0;
+    double cos_abp = (double)mulv(-x_ab,-y_ab,x_bp,y_bp)/(ab * bp);
+    if(cos_abp <= 0) return bp;
+    return (ap * sqrt(1 - cos_bap * cos_bap));
+}
+
+
 polygon createPolygon(){
     polygon pg;
-    pg.collinear = true;
     pg.x.clear();
     pg.y.clear();
     return pg;
 }
 
 void clearPolygon(polygon* pg){
-    pg->collinear = true;
     pg->x.clear();
     pg->y.clear();
 }
@@ -120,23 +152,24 @@ bool canAddPointToPolygon(polygon pg, int x, int y){
     if(siz <=0 ) return true;
     if(x == pg.x[0] && y == pg.y[0]){
         if(siz <= 2) return false;
-        if(pg.collinear == true) return false;
+        for(int i = 1 ; i < siz - 1; i++){
+            //new seg & existed points dis < thresh
+            if(pointDistanceSegment(pg.x[i],pg.y[i],pg.x[siz-1],pg.y[siz-1],x,y) < POINT_SEGMENT_THRESH) return false;
+        }
         return true;
     }
-    bool intersect = false;
     int lx = pg.x[siz-1];
     int ly = pg.y[siz-1];
+    //new seg & existed segs intersect
     for(int i = 1; i < siz - 1; i++){
-        bool cur = segmentIntersect(pg.x[i - 1], pg.y[i - 1], pg.x[i], pg.y[i], lx, ly, x, y);
-        if (cur == true){
-            intersect = true;
-            break;
-        }
+        if(segmentIntersect(pg.x[i - 1], pg.y[i - 1], pg.x[i], pg.y[i], lx, ly, x, y)) return false;
+        //if(segmentIntersect(pg.x[i - 1], pg.y[i - 1], pg.x[i], pg.y[i], lx, ly, x, y)) return false;
     }
-    if(intersect == true) return false;
-    if(siz >= 2 && pointOnSegment(x,y,pg.x[siz-1],pg.y[siz-1],pg.x[siz-2],pg.y[siz-2])){
-        cout << "on Segment so cannot add" << endl << x << ","<< y<< endl;
-        return false;
+    for(int i = 1; i < siz; i++){
+        //new point & existed segs dis < thresh
+        if(pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+        //new seg & existed points dis < thresh
+        if(pointDistanceSegment(pg.x[i-1],pg.y[i-1],lx,ly,x,y) < POINT_SEGMENT_THRESH) return false;
     }
     return true;
 }
@@ -151,16 +184,155 @@ bool validPolygon(polygon pg){
 }
 
 void addPointToPolygon(polygon* pg, int x, int y){
-    int siz = pg->x.size();
-    if(siz >= 2 && pg->collinear == true){
-        pg->collinear = pointOnSegment(x, y, pg->x[0], pg->y[0], pg->x[1], pg->y[1]);
-    }
     pg->x.push_back(x);
     pg->y.push_back(y);
 }
 
-bool nearPoint(int x,int y,int cx,int cy){
-    if(x >= cx - MOUSE_GAP && x <= cx + MOUSE_GAP &&
-       y >= cy - MOUSE_GAP && y <= cy + MOUSE_GAP) return true;
-    return false;
+bool canReplacePointInPolygon(polygon pg, int ind, int x, int y){
+    int siz = pg.x.size();
+    if(ind >= siz) return false;
+    //new seg(2) & existed segs intersect
+    //new point & existed segs dis < thresh
+    //new seg(2) & existed points dis < thresh
+    if(ind == 0){
+        for(int i = 1; i < siz - 1; i++){
+            if(i > 2 && segmentIntersect(x,y,pg.x[1],pg.y[1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 1 && i < siz - 2 && segmentIntersect(x,y,pg.x[siz-2],pg.y[siz-2],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 1 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i > 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[1],pg.y[1]) < POINT_SEGMENT_THRESH) return false;
+            if( i < siz - 2 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[siz-2],pg.y[siz-2]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    else if(ind == 1){
+        for(int i = 2; i < siz; i++){
+            if(i > 2 && i < siz -1 && segmentIntersect(x,y,pg.x[0],pg.y[0],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 3 && segmentIntersect(x,y,pg.x[2],pg.y[2],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 2 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i < siz - 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[0],pg.y[0]) < POINT_SEGMENT_THRESH) return false;
+            if( i > 2 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[2],pg.y[2]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    else if(ind == siz - 2){
+        for(int i = 0; i < ind; i++){
+            if(i > 0 && i < ind -1 && segmentIntersect(x,y,pg.x[ind-1],pg.y[ind-1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 1 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i < ind - 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind-1],pg.y[ind-1]) < POINT_SEGMENT_THRESH) return false;
+            if( i > 0 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    else{
+        for(int i = 0; i < ind; i++){
+            if(i > 0 && i < ind -1 && segmentIntersect(x,y,pg.x[ind-1],pg.y[ind-1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i < ind - 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind-1],pg.y[ind-1]) < POINT_SEGMENT_THRESH) return false;
+            if( pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+        for(int i = ind + 1; i < siz; i++){
+            if(i > ind + 1 && segmentIntersect(x,y,pg.x[ind-1],pg.y[ind-1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > ind + 2 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > ind + 1 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind-1],pg.y[ind-1]) < POINT_SEGMENT_THRESH) return false;
+            if( i > ind + 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    return true;
 }
+
+void replacePointInPolygon(polygon* pg, int ind, int x, int y){
+    int siz = pg->x.size();
+    if(ind >= siz) return;
+    pg->x[ind] = x;
+    pg->y[ind] = y;
+    if(ind == 0){
+       pg->x[siz-1] = x;
+       pg->y[siz-1] = y;
+    }
+}
+
+void getPolygonRect(polygon pg,int* minx,int* miny, int* maxx, int* maxy){
+    int x1,y1,x2,y2;
+    x1 = x2 = pg.x[0];
+    y1 = y2 = pg.y[0];
+    for(int i = 1; i < pg.x.size() - 1; i++){
+        int cx = pg.x[i];
+        int cy = pg.y[i];
+        x1 = min(x1,cx);
+        y1 = min(y1,cy);
+        x2 = max(x2,cx);
+        y2 = max(y2,cy);
+    }
+    *minx = x1;
+    *miny = y1;
+    *maxx = x2;
+    *maxy = y2;
+}
+
+void minPolygon(polygon* pg, int minx, int miny){
+    for(int i = 0; i < pg->x.size(); i++){
+        pg->x[i] -= minx;
+        pg->y[i] -= miny;
+    }
+}
+
+void print_poly(polygon pg){
+    for(int i=0;i<pg.x.size();i++){
+        cout << pg.x[i] << "," << pg.y[i] << " ";
+    }
+    cout << endl;
+}
+
+double getIntersectX(int y, int x1, int y1, int x2, int y2){
+    if(y == y1 && y1 == y2) return -1;
+    if(x1 == x2) return x1;
+    return (x2-x1)*(y-y1)/(y2-y1)+x1 ;
+}
+
+void getPolygonMask(polygon pg, int w, int h, vector<vector<int> > &msk){
+    msk.clear();
+    int siz = pg.x.size();
+    cout << "w:" << w << " h:" << h << endl;
+    for(int i = 0; i < h; i++){
+        vector<int> cur;
+        for(int j = 0; j < w; j++){
+            cur.push_back(0);
+        }
+        msk.push_back(cur);
+    }
+    for(int i = 0; i < h; i++){
+        // line y = i intersect with poly
+        vector<double> inter_x;
+        for(int j = 1; j < siz; j++){
+            if(segmentIntersect(0,i,w-1,i,pg.x[j-1],pg.y[j-1],pg.x[j],pg.y[j])){
+                double cur_x = getIntersectX(i,pg.x[j-1],pg.y[j-1],pg.x[j],pg.y[j]);
+                if(cur_x >= 0) inter_x.push_back(cur_x);
+            }
+        }
+        for(int j = 0; j < inter_x.size(); j++){
+            cout << inter_x[j] << " ";
+        }
+        sort(inter_x.begin(),inter_x.end());
+        for(int j = 0; j < inter_x.size(); j++){
+            cout << inter_x[j] << " ";
+        }
+        for(int j = 0; j < inter_x.size(); j += 2){
+            int st = (int)inter_x[j];
+            int ed = (int)inter_x[j+1];
+            for(int k = st; k <= ed; k++){
+                msk[i][k] = 1;
+            }
+        }
+    }
+}
+
+void copyPolygon(polygon pg, polygon * pg2){
+    pg2->x.clear();
+    pg2->y.clear();
+    for(int i=0;i<pg.x.size();i++){
+        pg2->x.push_back(pg.x[i]);
+        pg2->y.push_back(pg.y[i]);
+    }
+}
+
+

@@ -41,6 +41,17 @@ void MainWindow::on_open_des_img_clicked(){
 void MainWindow::on_select_ok_clicked(){
     if(srcimglabel->selectOver == false) return;
     if(desimglabel->hasImg == false) return;
+    desimglabel->SELECT_WAY = srcimglabel->SELECT_WAY;
+    if(srcimglabel->SELECT_WAY == POLY){
+        getPolygonRect(srcimglabel->poly,
+                       &(srcimglabel->minx),
+                       &(srcimglabel->miny),
+                       &(srcimglabel->maxx),
+                       &(srcimglabel->maxy));
+        copyPolygon(srcimglabel->poly,&(desimglabel->poly));
+        minPolygon(&(desimglabel->poly),srcimglabel->minx,srcimglabel->miny);
+        print_poly(desimglabel->poly);
+    }
     desimglabel->hasSubImg = true;
     desimglabel->subx = 0;
     desimglabel->suby = 0;
@@ -50,11 +61,17 @@ void MainWindow::on_select_ok_clicked(){
     int h = srcimglabel->maxy - srcimglabel->miny + 1;
     desimglabel->subw = w;
     desimglabel->subh = h;
+    if(desimglabel->SELECT_WAY == POLY ){
+        getPolygonMask(desimglabel->poly,w,h,desimglabel->submask);
+    }
     desimglabel->subimage = new QImage(w, h, srcimglabel->image->format());
     for(int y = imgy; y < imgy + h ; y++){
         QRgb *rowData = (QRgb*)srcimglabel->image->scanLine(y);
         for(int x = imgx; x < imgx + w; x++){
             desimglabel->subimage->setPixel(x-imgx,y-imgy,rowData[x]);
+            if(desimglabel->SELECT_WAY == POLY && desimglabel->submask[y-imgy][x-imgx]==0){
+                desimglabel->subimage->setPixel(x-imgx,y-imgy,0);
+            }
         }
     }
     desimglabel->needDraw = true;

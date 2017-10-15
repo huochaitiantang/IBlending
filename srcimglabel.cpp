@@ -20,6 +20,10 @@ void SrcImgLabel::paintEvent(QPaintEvent *event){
     else if(SELECT_WAY == POLY) polyPaintEvent(event);
 }
 
+void SrcImgLabel::open_img(QScrollArea *scroll_area){
+    ImgLabel::open_img(scroll_area);
+    clear_select();
+}
 
 int SrcImgLabel::inRectLine(int x, int y){
     if(inImg(x,y) == false || selectOver == false) return 0;
@@ -162,6 +166,7 @@ void SrcImgLabel::rectPaintEvent(QPaintEvent *event)
 void SrcImgLabel::clear_select(){
     selectOver = false;
     needDraw = false;
+    replace_point = false;
     clearPolygon(&poly);
     update();
 }
@@ -170,16 +175,22 @@ void SrcImgLabel::polyMouseMoveEvent(QMouseEvent *event){
     ImgLabel::mouseMoveEvent(event);
     setCursor(Qt::ArrowCursor);
     int siz = poly.x.size();
-    if(siz > 0 && selectOver == false && inImg(cur_x,cur_y)){
-        int fx = poly.x[0];
-        int fy = poly.y[0];
-        if(nearPoint(cur_x,cur_y,fx,fy) == true){
-            cur_x = fx;
-            cur_y = fy;
-            setCursor(Qt::CrossCursor);
+    if(siz > 0){
+        int siz = poly.x.size();
+        for(int i = 0; i < siz; i++){
+            int cx = poly.x[i];
+            int cy = poly.y[i];
+            if(nearPoint(cur_x,cur_y,cx,cy) == true){
+                cur_x = cx;
+                cur_y = cy;
+                setCursor(Qt::CrossCursor);
+                break;
+            }
         }
-        if(canAddPointToPolygon(poly,cur_x,cur_y)){
-            needDraw = true;
+        if(selectOver &&(event->buttons() & Qt::LeftButton) && replace_point){
+            can_replace = false;
+            if(inImg(cur_x,cur_y) && canReplacePointInPolygon(poly,replace_ind,cur_x,cur_y))
+                can_replace = true;
         }
     }
     update();
@@ -190,8 +201,20 @@ void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
     getCurXY(event);
     if(inImg(cur_x,cur_y) == false) return;
     if(selectOver == true){
-        selectOver = false;
-        clearPolygon(&poly);
+        int i,siz=poly.x.size();
+        for(i = 0; i < siz; i++){
+            int cx = poly.x[i];
+            int cy = poly.y[i];
+            if(nearPoint(cur_x,cur_y,cx,cy) == true){
+                cur_x = cx;
+                cur_y = cy;
+                break;
+            }
+        }
+        if(i < siz){
+            replace_point = true;
+            replace_ind = i;
+        }
     }
     else{
         if(poly.x.size() == 0){
@@ -211,15 +234,18 @@ void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
                 }
             }
         }
-        for(int i=0;i<poly.x.size();i++){
-            cout << poly.x[i] << "," << poly.y[i] << " ";
-        }
-        cout << endl;
+        print_poly(poly);
     }
 }
 
 void SrcImgLabel::polyMouseReleaseEvent(QMouseEvent *event){
-    return;
+    if(replace_point){
+        if(can_replace){
+            replacePointInPolygon(&poly,replace_ind,cur_x,cur_y);
+        }
+        replace_point = false;
+    }
+    update();
 }
 
 void SrcImgLabel::polyPaintEvent(QPaintEvent *event){
@@ -227,14 +253,31 @@ void SrcImgLabel::polyPaintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setPen(QPen(Qt::green,1));
     int siz = poly.x.size();
-    for(int i=1; i<siz; i++){
-        painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(poly.x[i],poly.y[i]));
+    if(selectOver == false){
+        for(int i=1; i<siz; i++){
+            painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(poly.x[i],poly.y[i]));
+        }
+        if(!inImg(cur_x,cur_y) || !canAddPointToPolygon(poly,cur_x,cur_y) ){
+            painter.setPen(QPen(Qt::red,1));
+        }
+        if(poly.x.size()>0){
+            painter.drawLine(QPoint(poly.x[siz-1],poly.y[siz-1]),QPoint(cur_x,cur_y));
+        }
     }
-    if(!needDraw){
-        painter.setPen(QPen(Qt::red,1));
-    }
-    needDraw = false;
-    if(selectOver == false && poly.x.size()>0){
-        painter.drawLine(QPoint(poly.x[siz-1],poly.y[siz-1]),QPoint(cur_x,cur_y));
+    else{
+        for(int i=1; i<siz; i++){
+            if(replace_point && (i-1 == replace_ind || i == replace_ind ||(replace_ind == 0 && i == siz -1))){
+                painter.setPen(QPen(Qt::red,1));
+                if(can_replace) painter.setPen(QPen(Qt::blue,1));
+                if(i-1 == replace_ind)
+                    painter.drawLine(QPoint(cur_x,cur_y),QPoint(poly.x[i],poly.y[i]));
+                else
+                    painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(cur_x,cur_y));
+                painter.setPen(QPen(Qt::green,1));
+            }
+            else{
+                painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(poly.x[i],poly.y[i]));
+            }
+        }
     }
 }

@@ -10,6 +10,10 @@ class SrcImgLabel : public ImgLabel
         bool selectOver = false;
         SrcImgLabel(QLabel *info):ImgLabel(info){}
         void clear_select();
+        void open_img(QScrollArea *scroll_area);
+        bool replace_point = false;
+        int replace_ind = 0;
+        bool can_replace = false;
 
     protected:
         int inRectLine(int x, int y);

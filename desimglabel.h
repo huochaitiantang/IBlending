@@ -26,6 +26,7 @@ class DesImgLabel : public ImgLabel
         void save_img(char s[]);
         void open_img(QScrollArea *scroll_area);
         void forward_backward(int offset);
+        vector<vector<int> > submask;
 
     protected:
         int inRectLine(int x, int y);
