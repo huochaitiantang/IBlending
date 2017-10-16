@@ -190,18 +190,31 @@ void DesImgLabel::mouseReleaseEvent(QMouseEvent *event){
 QImage * DesImgLabel::getDisplayImage(){
     QImage * DImg = new QImage(image->width(),image->height(),image->format());
     QImage * scaleImg = new QImage;
+    QImage * scaleImgMask = new QImage;
     *scaleImg = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
+    *scaleImgMask = subimagemask->scaled(subw, subh , Qt::IgnoreAspectRatio);
     QRgb *Bigrow;
     QRgb *Smlrow;
+    QRgb *SmlMskrow;
     for(int y = 0; y < img_height; y++){
         Bigrow = (QRgb*)image->scanLine(y);
         bool yok = ((y >= suby)&&(y < suby + subh));
-        if(yok) Smlrow = (QRgb*)scaleImg->scanLine(y - suby);
+        if(yok) {
+            Smlrow = (QRgb*)scaleImg->scanLine(y - suby);
+            SmlMskrow = (QRgb*)scaleImgMask->scanLine(y - suby);
+        }
         for(int x = 0; x < img_width; x++){
             if( yok && x >= subx && x < subx + subw){
-                DImg->setPixel(x, y, Smlrow[x - subx]);
+                if(SmlMskrow[x - subx] == qRgb(255,255,255)){
+                    DImg->setPixel(x, y, Smlrow[x - subx]);
+                }
+                else{
+                    DImg->setPixel(x, y, Bigrow[x]);
+                }
             }
             else{
+
+                //DImg->setPixel(x, y, qRgb(Bigrow[3*x]>>1,Bigrow[3*x+1]>>1,Bigrow[3*x+2]>>1));
                 DImg->setPixel(x, y, Bigrow[x]);
             }
         }

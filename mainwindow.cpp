@@ -61,17 +61,26 @@ void MainWindow::on_select_ok_clicked(){
     int h = srcimglabel->maxy - srcimglabel->miny + 1;
     desimglabel->subw = w;
     desimglabel->subh = h;
+    desimglabel->subimagemask = NULL;
     if(desimglabel->SELECT_WAY == POLY ){
+        desimglabel->subimagemask = new QImage(w, h, srcimglabel->image->format());
         getPolygonMask(desimglabel->poly,w,h,desimglabel->submask);
+        for(int y = 0; y < h; y++){
+            for(int x = 0; x < w; x++){
+                if(desimglabel->submask[y][x]==1){
+                    desimglabel->subimagemask->setPixel(x,y,qRgb(255,255,255));
+                }
+                else{
+                    desimglabel->subimagemask->setPixel(x,y,qRgb(0,0,0));
+                }
+            }
+        }
     }
     desimglabel->subimage = new QImage(w, h, srcimglabel->image->format());
     for(int y = imgy; y < imgy + h ; y++){
         QRgb *rowData = (QRgb*)srcimglabel->image->scanLine(y);
         for(int x = imgx; x < imgx + w; x++){
             desimglabel->subimage->setPixel(x-imgx,y-imgy,rowData[x]);
-            if(desimglabel->SELECT_WAY == POLY && desimglabel->submask[y-imgy][x-imgx]==0){
-                desimglabel->subimage->setPixel(x-imgx,y-imgy,0);
-            }
         }
     }
     desimglabel->needDraw = true;
