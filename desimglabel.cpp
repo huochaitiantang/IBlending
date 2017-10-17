@@ -255,9 +255,7 @@ void DesImgLabel::paintEvent(QPaintEvent *event){
     }
     QImage * DImg = getDisplayImage();
     this->setPixmap(QPixmap::fromImage(*DImg)); //can trigger paintevent too, needDraw can stop repeat
-//    QPainter painter(this);
-//    painter.setPen(QPen(Qt::green,10));
-//    painter.drawRect(QRect(subx + img_anchor_x, suby + img_anchor_y, subw, subh));
+    DImg->~QImage();
     needDraw = false;
 }
 
