@@ -184,9 +184,11 @@ void DesImgLabel::mouseMoveEvent(QMouseEvent *event){
             subw = x - subx;
             subh = y - suby;
         }
-        *subimagescale = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
-        if(SELECT_WAY == POLY)
-            *subimagemaskscale = subimagemask->scaled(subw, subh, Qt::IgnoreAspectRatio);
+        if((stretch >= 1 && stretch <=4 ) ||(stretch >=6 && stretch <= 9)){
+            *subimagescale = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
+            if(SELECT_WAY == POLY)
+                *subimagemaskscale = subimagemask->scaled(subw, subh, Qt::IgnoreAspectRatio);
+        }
         update();
     }
 }
