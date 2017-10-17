@@ -3,22 +3,35 @@
 
 void DesImgLabel::poisson(){
     if(this->hasSubImg == false || this->hasImg == false) return;
-    QImage *srcImg = new QImage;
-    *srcImg = this->subimage->scaled(this->subw, this->subh, Qt::IgnoreAspectRatio);
-    Mat src, des, ans;
+    //QImage *srcImg = new QImage;
+    //QImage *srcImgMsk = new QImage;
+    //*srcImg = this->subimagescale;
+    Mat src, des, ans, msk;
     vector<Mat> src_v;
     vector<Mat> des_v;
     vector<Mat> ans_v;
-    src = QImage2cvMat(srcImg);
+    vector<Mat> msk_v;
+    src = QImage2cvMat(subimagescale);
     des = QImage2cvMat(this->image);
     split(src, src_v);
     split(des,des_v);
     if(src_v.size() == 4) src_v.pop_back();
     if(des_v.size() == 4) des_v.pop_back();
     merge(src_v, src);
-    merge(des_v,des);
-    // 0 FR; 1 Normal Clone; 2 Mixed Clone
-    ans = getPoissonMat(des, src, Rect(this->subx, this->suby, this->subw, this->subh), 1);
+    merge(des_v, des);
+    if(SELECT_WAY == POLY){
+        //*srcImgMsk = this->subimagemaskscale;
+        msk = QImage2cvMat(subimagemaskscale);
+        split(msk,msk_v);
+        if(msk_v.size() == 4) msk_v.pop_back();
+        merge(msk_v, msk);
+        // 0 FR; 1 Normal Clone; 2 Mixed Clone
+        ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 1);
+    }
+    else{
+        // 0 FR; 1 Normal Clone; 2 Mixed Clone
+        ans = getPoissonMat(des, src, Rect(this->subx, this->suby, this->subw, this->subh), 1);
+    }
     split(ans,ans_v);
     Mat whiteC = 255 * Mat::ones(ans_v[0].rows, ans_v[0].cols, ans_v[0].depth());
     ans_v.push_back(whiteC);
@@ -28,6 +41,10 @@ void DesImgLabel::poisson(){
     while(img_buf_index < img_buf.size() - 1) img_buf.pop_back();
     cur_old.img = image;
     cur_old.subimg = subimage;
+    cur_old.subimgmsk = subimagemask;
+    cur_old.subimgscale = subimagescale;
+    cur_old.subimgmskscale = subimagemaskscale;
+    cur_old.selectway = SELECT_WAY;
     cur_old.withsub = true;
     cur_old.x = subx;
     cur_old.y = suby;
@@ -167,6 +184,9 @@ void DesImgLabel::mouseMoveEvent(QMouseEvent *event){
             subw = x - subx;
             subh = y - suby;
         }
+        *subimagescale = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
+        if(SELECT_WAY == POLY)
+            *subimagemaskscale = subimagemask->scaled(subw, subh, Qt::IgnoreAspectRatio);
         update();
     }
 }
@@ -189,10 +209,6 @@ void DesImgLabel::mouseReleaseEvent(QMouseEvent *event){
 
 QImage * DesImgLabel::getDisplayImage(){
     QImage * DImg = new QImage(image->width(),image->height(),image->format());
-    QImage * scaleImg = new QImage;
-    QImage * scaleImgMask = new QImage;
-    *scaleImg = subimage->scaled(subw, subh , Qt::IgnoreAspectRatio);
-    *scaleImgMask = subimagemask->scaled(subw, subh , Qt::IgnoreAspectRatio);
     QRgb *Bigrow;
     QRgb *Smlrow;
     QRgb *SmlMskrow;
@@ -200,21 +216,22 @@ QImage * DesImgLabel::getDisplayImage(){
         Bigrow = (QRgb*)image->scanLine(y);
         bool yok = ((y >= suby)&&(y < suby + subh));
         if(yok) {
-            Smlrow = (QRgb*)scaleImg->scanLine(y - suby);
-            SmlMskrow = (QRgb*)scaleImgMask->scanLine(y - suby);
+            Smlrow = (QRgb*)subimagescale->scanLine(y - suby);
+            if(SELECT_WAY == POLY)
+                SmlMskrow = (QRgb*)subimagemaskscale->scanLine(y - suby);
         }
         for(int x = 0; x < img_width; x++){
             if( yok && x >= subx && x < subx + subw){
-                if(SmlMskrow[x - subx] == qRgb(255,255,255)){
-                    DImg->setPixel(x, y, Smlrow[x - subx]);
-                }
-                else{
-                    DImg->setPixel(x, y, Bigrow[x]);
+                DImg->setPixel(x, y, Smlrow[x - subx]);
+                if(SELECT_WAY == POLY && SmlMskrow[x - subx] == qRgb(0,0,0)){
+                        QColor qc(Bigrow[x]);
+                        qc.setRed((qc.red()+150)/2);
+                        qc.setGreen((qc.green()+150)/2);
+                        qc.setBlue((qc.blue()+150)/2);
+                        DImg->setPixel(x, y, qc.rgb());
                 }
             }
             else{
-
-                //DImg->setPixel(x, y, qRgb(Bigrow[3*x]>>1,Bigrow[3*x+1]>>1,Bigrow[3*x+2]>>1));
                 DImg->setPixel(x, y, Bigrow[x]);
             }
         }
@@ -251,6 +268,10 @@ void DesImgLabel::forward_backward(int offset){
     hasSubImg = img_buf[tmp].withsub;
     if(hasSubImg){
         subimage = img_buf[tmp].subimg;
+        subimagemask = img_buf[tmp].subimgmsk;
+        subimagescale = img_buf[tmp].subimgscale;
+        subimagemaskscale = img_buf[tmp].subimgmskscale;
+        SELECT_WAY = img_buf[tmp].selectway;
         subx = img_buf[tmp].x;
         suby = img_buf[tmp].y;
         subw = img_buf[tmp].w;

@@ -62,8 +62,10 @@ void MainWindow::on_select_ok_clicked(){
     desimglabel->subw = w;
     desimglabel->subh = h;
     desimglabel->subimagemask = NULL;
+    desimglabel->subimagemaskscale = NULL;
     if(desimglabel->SELECT_WAY == POLY ){
         desimglabel->subimagemask = new QImage(w, h, srcimglabel->image->format());
+        desimglabel->subimagemaskscale = new QImage(w, h, srcimglabel->image->format());
         getPolygonMask(desimglabel->poly,w,h,desimglabel->submask);
         for(int y = 0; y < h; y++){
             for(int x = 0; x < w; x++){
@@ -75,14 +77,17 @@ void MainWindow::on_select_ok_clicked(){
                 }
             }
         }
+        *(desimglabel->subimagemaskscale) = desimglabel->subimagemask->scaled(w, h, Qt::IgnoreAspectRatio);
     }
     desimglabel->subimage = new QImage(w, h, srcimglabel->image->format());
+    desimglabel->subimagescale = new QImage(w, h, srcimglabel->image->format());
     for(int y = imgy; y < imgy + h ; y++){
         QRgb *rowData = (QRgb*)srcimglabel->image->scanLine(y);
         for(int x = imgx; x < imgx + w; x++){
             desimglabel->subimage->setPixel(x-imgx,y-imgy,rowData[x]);
         }
     }
+    *(desimglabel->subimagescale) = desimglabel->subimage->scaled(w, h, Qt::IgnoreAspectRatio);
     desimglabel->needDraw = true;
     desimglabel->update();
 }

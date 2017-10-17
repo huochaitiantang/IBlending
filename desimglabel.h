@@ -7,7 +7,11 @@
 typedef struct{
     QImage * img;
     QImage * subimg;
+    QImage * subimgmsk;
+    QImage * subimgscale;
+    QImage * subimgmskscale;
     int x, y, w, h;
+    select_way_e selectway;
     bool withsub;
 } desimg_t;
 
@@ -28,6 +32,8 @@ class DesImgLabel : public ImgLabel
         void forward_backward(int offset);
         vector<vector<int> > submask;
         QImage *subimagemask;
+        QImage *subimagescale;
+        QImage *subimagemaskscale;
 
     protected:
         int inRectLine(int x, int y);
