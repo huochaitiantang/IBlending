@@ -344,4 +344,66 @@ void copyPolygon(polygon pg, polygon * pg2){
     }
 }
 
+double getSlope(int x1, int y1, int x2, int y2){
+    if(x1 == x2) return 65535.0;
+    return (double)(y1-y2)/(x1-x2);
+}
+
+bool canInsertPointInPolygon(polygon pg, int ind, int x, int y){
+    int siz = pg.x.size();
+    if(ind >= siz) return false;
+    //new seg(2) & existed segs intersect
+    //new point & existed segs dis < thresh
+    //new seg(2) & existed points dis < thresh
+    if(ind == 0){
+        for(int i = 1; i < siz; i++){
+            if(i > 1 && i < siz - 1 && segmentIntersect(x,y,pg.x[0],pg.y[0],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 2 && segmentIntersect(x,y,pg.x[1],pg.y[1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 1 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i < siz - 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[0],pg.y[0]) < POINT_SEGMENT_THRESH) return false;
+            if( i > 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[1],pg.y[1]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    else if(ind == siz - 2){
+        for(int i = 0; i <= ind; i++){
+            if(i > 0 && i < ind && segmentIntersect(x,y,pg.x[ind],pg.y[ind],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 1 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( i < ind && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind],pg.y[ind]) < POINT_SEGMENT_THRESH) return false;
+            if( i > 0 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    else{
+        for(int i = 0; i <= ind; i++){
+            if(i > 0 && i < ind && segmentIntersect(x,y,pg.x[ind],pg.y[ind],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > 0 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if(i < ind && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind],pg.y[ind]) < POINT_SEGMENT_THRESH) return false;
+            if( pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+        for(int i = ind + 1; i < siz; i++){
+            if(i > ind + 1 && segmentIntersect(x,y,pg.x[ind],pg.y[ind],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > ind + 2 && segmentIntersect(x,y,pg.x[ind+1],pg.y[ind+1],pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i])) return false;
+            if(i > ind + 1 && pointDistanceSegment(x,y,pg.x[i-1],pg.y[i-1],pg.x[i],pg.y[i]) < POINT_SEGMENT_THRESH) return false;
+            if( pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind],pg.y[ind]) < POINT_SEGMENT_THRESH) return false;
+            if( i > ind + 1 && pointDistanceSegment(pg.x[i],pg.y[i],x,y,pg.x[ind+1],pg.y[ind+1]) < POINT_SEGMENT_THRESH) return false;
+        }
+    }
+    return true;
+}
+
+void insertPointInPolygon(polygon* pg, int ind, int x, int y){
+    int siz = pg->x.size();
+    if(ind >= siz - 1) return;
+    vector<int>::iterator iter_x = pg->x.begin();
+    vector<int>::iterator iter_y = pg->y.begin();
+    for(int i=0;i<=ind;i++) {
+        iter_x++;
+        iter_y++;
+    }
+    pg->x.insert(iter_x,x);
+    pg->y.insert(iter_y,y);
+}
+
+
 

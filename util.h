@@ -29,6 +29,8 @@ bool validPolygon(polygon pg);
 void clearPolygon(polygon* pg);
 bool canReplacePointInPolygon(polygon pg, int ind, int x, int y);
 void replacePointInPolygon(polygon* pg, int ind, int x, int y);
+bool canInsertPointInPolygon(polygon pg, int ind, int x, int y);
+void insertPointInPolygon(polygon* pg, int ind, int x, int y);
 
 void getPolygonRect(polygon pg,int* minx,int* miny, int* maxx, int* maxy);
 void minPolygon(polygon* pg, int minx, int miny);
@@ -37,6 +39,7 @@ void getPolygonMask(polygon pg, int w, int h, vector<vector<int> > &msk);
 
 double getIntersectX(int y, int x1, int y1, int x2, int y2);
 bool nearPoint(int x,int y,int cx,int cy);
+double getSlope(int x1, int y1, int x2, int y2);
 
 void copyPolygon(polygon pg, polygon * pg2);
 

@@ -186,11 +186,23 @@ void SrcImgLabel::polyMouseMoveEvent(QMouseEvent *event){
                 setCursor(Qt::CrossCursor);
                 break;
             }
+            else if(selectOver && i > 0 && pointDistanceSegment(cur_x,cur_y,poly.x[i-1],poly.y[i-1],cx,cy) <= MOUSE_GAP){
+                double slope = getSlope(poly.x[i-1],poly.y[i-1],cx,cy);
+                if(slope >= -0.1 && slope <= 0.1) setCursor(Qt::SizeVerCursor);
+                else if(slope > 0.1 && slope < 10.0) setCursor(Qt::SizeBDiagCursor);
+                else if(slope < -0.1 && slope > -10.0) setCursor(Qt::SizeFDiagCursor);
+                else setCursor(Qt::SizeHorCursor);
+            }
         }
         if(selectOver &&(event->buttons() & Qt::LeftButton) && replace_point){
             can_replace = false;
             if(inImg(cur_x,cur_y) && canReplacePointInPolygon(poly,replace_ind,cur_x,cur_y))
                 can_replace = true;
+        }
+        else if(selectOver &&(event->buttons() & Qt::LeftButton) && insert_point){
+            can_insert = false;
+            if(inImg(cur_x,cur_y) && canInsertPointInPolygon(poly,insert_ind,cur_x,cur_y))
+                can_insert = true;
         }
     }
     update();
@@ -208,12 +220,15 @@ void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
             if(nearPoint(cur_x,cur_y,cx,cy) == true){
                 cur_x = cx;
                 cur_y = cy;
+                replace_point = true;
+                replace_ind = i;
                 break;
             }
-        }
-        if(i < siz){
-            replace_point = true;
-            replace_ind = i;
+            if(i > 0 && pointDistanceSegment(cur_x,cur_y,poly.x[i-1],poly.y[i-1],cx,cy) <= MOUSE_GAP){
+                insert_point = true;
+                insert_ind = i - 1;
+                break;
+            }
         }
     }
     else{
@@ -234,7 +249,6 @@ void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
                 }
             }
         }
-        print_poly(poly);
     }
 }
 
@@ -245,6 +259,13 @@ void SrcImgLabel::polyMouseReleaseEvent(QMouseEvent *event){
         }
         replace_point = false;
     }
+    else if(insert_point){
+        if(can_insert){
+            insertPointInPolygon(&poly,insert_ind,cur_x,cur_y);
+        }
+        insert_point = false;
+    }
+    print_poly(poly);
     update();
 }
 
@@ -273,6 +294,13 @@ void SrcImgLabel::polyPaintEvent(QPaintEvent *event){
                     painter.drawLine(QPoint(cur_x,cur_y),QPoint(poly.x[i],poly.y[i]));
                 else
                     painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(cur_x,cur_y));
+                painter.setPen(QPen(Qt::green,1));
+            }
+            else if(insert_point && (i-1 == insert_ind)){
+                painter.setPen(QPen(Qt::red,1));
+                if(can_insert) painter.setPen(QPen(Qt::blue,1));
+                painter.drawLine(QPoint(cur_x,cur_y),QPoint(poly.x[i-1],poly.y[i-1]));
+                painter.drawLine(QPoint(cur_x,cur_y),QPoint(poly.x[i],poly.y[i]));
                 painter.setPen(QPen(Qt::green,1));
             }
             else{

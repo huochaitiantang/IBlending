@@ -12,8 +12,11 @@ class SrcImgLabel : public ImgLabel
         void clear_select();
         void open_img(QScrollArea *scroll_area);
         bool replace_point = false;
+        bool insert_point = false;
         int replace_ind = 0;
+        int insert_ind = 0;
         bool can_replace = false;
+        bool can_insert = false;
 
     protected:
         int inRectLine(int x, int y);
