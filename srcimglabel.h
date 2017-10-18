@@ -17,6 +17,7 @@ class SrcImgLabel : public ImgLabel
         int insert_ind = 0;
         bool can_replace = false;
         bool can_insert = false;
+        bool can_merge = false;
 
     protected:
         int inRectLine(int x, int y);

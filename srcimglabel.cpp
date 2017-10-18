@@ -196,8 +196,24 @@ void SrcImgLabel::polyMouseMoveEvent(QMouseEvent *event){
         }
         if(selectOver &&(event->buttons() & Qt::LeftButton) && replace_point){
             can_replace = false;
-            if(inImg(cur_x,cur_y) && canReplacePointInPolygon(poly,replace_ind,cur_x,cur_y))
+            can_merge  = false;
+            if(inImg(cur_x,cur_y) && canReplacePointInPolygon(poly,replace_ind,cur_x,cur_y)){
                 can_replace = true;
+                if(siz > 4){
+                    //if relpace point to to the line of i-1 and i+1, delete the point
+                    int ind1 = replace_ind - 1;
+                    int ind2 = replace_ind + 1;
+                    if(ind1 < 0) ind1 = siz - 2;
+                    if(pointDistanceSegment(cur_x,cur_y,poly.x[ind1],poly.y[ind1],poly.x[ind2],poly.y[ind2]) <= MOUSE_GAP){
+                        double slope = getSlope(poly.x[ind1],poly.y[ind1],poly.x[ind2],poly.y[ind2]);
+                        if(slope >= -0.1 && slope <= 0.1) setCursor(Qt::SizeVerCursor);
+                        else if(slope > 0.1 && slope < 10.0) setCursor(Qt::SizeBDiagCursor);
+                        else if(slope < -0.1 && slope > -10.0) setCursor(Qt::SizeFDiagCursor);
+                        else setCursor(Qt::SizeHorCursor);
+                        can_merge = true;
+                    }
+                }
+            }
         }
         else if(selectOver &&(event->buttons() & Qt::LeftButton) && insert_point){
             can_insert = false;
@@ -255,13 +271,16 @@ void SrcImgLabel::polyMousePressEvent(QMouseEvent *event){
 void SrcImgLabel::polyMouseReleaseEvent(QMouseEvent *event){
     if(replace_point){
         if(can_replace){
-            replacePointInPolygon(&poly,replace_ind,cur_x,cur_y);
+            if(can_merge) deletePointInPolygon(&poly,replace_ind);
+            else replacePointInPolygon(&poly,replace_ind,cur_x,cur_y);
         }
         replace_point = false;
     }
     else if(insert_point){
         if(can_insert){
-            insertPointInPolygon(&poly,insert_ind,cur_x,cur_y);
+            int ind = insert_ind;
+            if(pointDistanceSegment(cur_x,cur_y,poly.x[ind],poly.y[ind],poly.x[ind+1],poly.y[ind+1]) > MOUSE_GAP)
+                insertPointInPolygon(&poly,insert_ind,cur_x,cur_y);
         }
         insert_point = false;
     }
@@ -272,8 +291,14 @@ void SrcImgLabel::polyMouseReleaseEvent(QMouseEvent *event){
 void SrcImgLabel::polyPaintEvent(QPaintEvent *event){
     QLabel::paintEvent(event);//先调用父类的paintEvent为了显示'背景'!!!
     QPainter painter(this);
-    painter.setPen(QPen(Qt::green,1));
     int siz = poly.x.size();
+    for(int i = 0; i < siz; i++){
+        painter.setPen(QPen(QColor(255, 255, 255), 1));
+        painter.setBrush(QColor(255, 255, 255));
+        if(!(selectOver && replace_point && (replace_ind == i || (replace_ind == 0 && i == siz -1))))
+            painter.drawRect(max(0,poly.x[i]-2), max(0,poly.y[i]-2), 4, 4);
+    }
+    painter.setPen(QPen(Qt::green,1));
     if(selectOver == false){
         for(int i=1; i<siz; i++){
             painter.drawLine(QPoint(poly.x[i-1],poly.y[i-1]),QPoint(poly.x[i],poly.y[i]));

@@ -31,6 +31,7 @@ bool canReplacePointInPolygon(polygon pg, int ind, int x, int y);
 void replacePointInPolygon(polygon* pg, int ind, int x, int y);
 bool canInsertPointInPolygon(polygon pg, int ind, int x, int y);
 void insertPointInPolygon(polygon* pg, int ind, int x, int y);
+void deletePointInPolygon(polygon* pg, int ind);
 
 void getPolygonRect(polygon pg,int* minx,int* miny, int* maxx, int* maxy);
 void minPolygon(polygon* pg, int minx, int miny);

@@ -405,5 +405,28 @@ void insertPointInPolygon(polygon* pg, int ind, int x, int y){
     pg->y.insert(iter_y,y);
 }
 
+void deletePointInPolygon(polygon* pg, int ind){
+    int siz = pg->x.size();
+    if(ind >= siz - 1) return;
+    vector<int>::iterator iter_x = pg->x.begin();
+    vector<int>::iterator iter_y = pg->y.begin();
+    if(ind == 0){
+        pg->x.pop_back();
+        pg->y.pop_back();
+        pg->x.erase(iter_x);
+        pg->y.erase(iter_y);
+        pg->x.push_back(pg->x[0]);
+        pg->y.push_back(pg->y[0]);
+    }
+    else{
+        for(int i = 0; i < ind; i++){
+            iter_x ++;
+            iter_y ++;
+        }
+        pg->x.erase(iter_x);
+        pg->y.erase(iter_y);
+    }
+}
+
 
 
