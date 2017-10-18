@@ -26,7 +26,8 @@ void DesImgLabel::poisson(){
         if(msk_v.size() == 4) msk_v.pop_back();
         merge(msk_v, msk);
         // 0 FR; 1 Normal Clone; 2 Mixed Clone
-        ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 1);
+        //ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 1);
+        ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 0);
     }
     else{
         // 0 FR; 1 Normal Clone; 2 Mixed Clone
