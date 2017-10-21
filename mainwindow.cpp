@@ -14,11 +14,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->actiongo_to_switch, SIGNAL(triggered()), this, SLOT(switch_to_edit()));
 
     QButtonGroup *btgroup = new QButtonGroup(this);
-    btgroup->addButton(ui->rect);
     btgroup->addButton(ui->poly);
+    btgroup->addButton(ui->rect);
 
-    connect(ui->rect, SIGNAL(clicked()), this, SLOT(on_rect_clicked()));
     connect(ui->poly, SIGNAL(clicked()), this, SLOT(on_poly_clicked()));
+    connect(ui->rect, SIGNAL(clicked()), this, SLOT(on_rect_clicked()));
+
+    this->ui->fusion_way->addItem("POISSON_OPENCV_NORMAL");
+    this->ui->fusion_way->addItem("POISSON_OPENCV_MIXED");
+    this->ui->fusion_way->addItem("POISSON_OWN_RECT");
+    this->ui->fusion_way->addItem("POISSON_OWN_POLY");
+    this->ui->fusion_way->addItem("POISSON_OWN_DRAG");
+    connect(this->ui->fusion_way, SIGNAL(currentIndexChanged(int)), this, SLOT(switch_fusion_way()));
 
     srcimglabel->poly = createPolygon();
 }
@@ -139,12 +146,15 @@ void MainWindow::adjust_widget(){
     this->ui->des_img_area->setGeometry(20 + MAX_X, 40, MAX_X, MAX_Y);
     this->ui->src_bottom_info->setGeometry(20, 40 + MAX_Y, MAX_X, 20);
     this->ui->des_bottom_info->setGeometry(20 + MAX_X, 40 + MAX_Y, MAX_X, 20);
-    this->ui->open_des_img->setGeometry(20 + MAX_X + 100 * 0, 10, 90, 25);
-    this->ui->poisson->setGeometry(20 + MAX_X + 100 * 1, 10, 90, 25);
-    this->ui->backward->setGeometry(20 + MAX_X + 100 * 2, 10, 90, 25);
-    this->ui->forward->setGeometry(20 + MAX_X + 100 * 3, 10, 90, 25);
-    this->ui->clear_roi->setGeometry(20 + MAX_X + 100 * 4, 10, 90, 25);
-    this->ui->save_img->setGeometry(20 + MAX_X + 100 * 5, 10, 90, 25);
+
+    this->ui->fusion_way->setGeometry(20 + MAX_X - 260, 10, 250, 25);
+    int bw = 90, bh = 25, bww = 100;
+    this->ui->open_des_img->setGeometry(20 + MAX_X + bww * 0, 10, bw, bh);
+    this->ui->poisson->setGeometry(20 + MAX_X + bww * 1, 10, bw, bh);
+    this->ui->backward->setGeometry(20 + MAX_X + bww * 2, 10, bw, bh);
+    this->ui->forward->setGeometry(20 + MAX_X + bww * 3, 10, bw, bh);
+    this->ui->clear_roi->setGeometry(20 + MAX_X + bww * 4, 10, bw, bh);
+    this->ui->save_img->setGeometry(20 + MAX_X + bww * 5, 10, bw, bh);
 }
 
 void MainWindow::switch_to_edit(){
@@ -155,11 +165,30 @@ void MainWindow::switch_to_edit(){
 void MainWindow::on_rect_clicked(){
     srcimglabel->SELECT_WAY = RECT;
     srcimglabel->clear_select();
+    ui->fusion_way->setCurrentIndex(0);
 }
 
 void MainWindow::on_poly_clicked(){
     srcimglabel->SELECT_WAY = POLY;
     srcimglabel->clear_select();
+    ui->fusion_way->setCurrentIndex(0);
+}
+
+void MainWindow::switch_fusion_way(){
+    int ind = ui->fusion_way->currentIndex();
+    if(ind == 1) desimglabel->ALGO = POISSON_OPENCV_MIXED;
+    else if(ind == 2 && srcimglabel->SELECT_WAY == RECT) desimglabel->ALGO = POISSON_OWN_RECT;
+    else if(ind == 3 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_POLY;
+    else if(ind == 4 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_DRAG;
+    else desimglabel->ALGO = POISSON_OPENCV_NORMAL;
+    // make sure that own_poly and own_drag not match with rect select way,
+    // own_rect not match with poly select way
+    if(   (ind == 2 && srcimglabel->SELECT_WAY != RECT)
+       || (ind == 3 && srcimglabel->SELECT_WAY != POLY)
+       || (ind == 4 && srcimglabel->SELECT_WAY != POLY) )
+        ui->fusion_way->setCurrentIndex(0);
+    QByteArray ba(ui->fusion_way->currentText().toAscii());
+    cout << "Change FUSION_WAY : " << ind << " : "<< ba.data() << endl;
 }
 
 

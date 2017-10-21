@@ -27,6 +27,7 @@ public:
 protected:
     void adjust_widget();
 
+
 private slots:
     void on_open_src_img_clicked();
     void on_open_des_img_clicked();
@@ -39,6 +40,7 @@ private slots:
     void switch_to_edit();
     void on_rect_clicked();
     void on_poly_clicked();
+    void switch_fusion_way();
 };
 
 

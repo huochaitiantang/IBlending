@@ -34,6 +34,7 @@ class DesImgLabel : public ImgLabel
         QImage *subimagemask;
         QImage *subimagescale;
         QImage *subimagemaskscale;
+        algorithm_e ALGO = POISSON_OPENCV_NORMAL;
 
     protected:
         int inRectLine(int x, int y);

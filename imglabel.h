@@ -16,6 +16,14 @@ typedef enum sw{
     POLY
 } select_way_e;
 
+typedef enum algo{
+    POISSON_OPENCV_NORMAL,
+    POISSON_OPENCV_MIXED,
+    POISSON_OWN_RECT,
+    POISSON_OWN_POLY,
+    POISSON_OWN_DRAG
+
+} algorithm_e;
 
 class ImgLabel : public QLabel
 {
@@ -35,7 +43,7 @@ class ImgLabel : public QLabel
         int MAX_Y = 500;
         void open_img(QScrollArea *scroll_area);
         ImgLabel(QLabel *info);
-        select_way_e SELECT_WAY = RECT;
+        select_way_e SELECT_WAY = POLY;
         polygon poly;
 
 

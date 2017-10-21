@@ -20,22 +20,25 @@ void DesImgLabel::poisson(){
     merge(src_v, src);
     merge(des_v, des);
     if(SELECT_WAY == POLY){
-        //*srcImgMsk = this->subimagemaskscale;
         msk = QImage2cvMat(subimagemaskscale);
         split(msk,msk_v);
         if(msk_v.size() == 4) msk_v.pop_back();
         merge(msk_v, msk);
-        // 0 FR; 1 Normal Clone; 2 Mixed Clone
-        ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 1);
-        //imshow("opencv",ans);
-        //ans = getPolygonPoissonMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), 0);
-        //imshow("FR",ans);
+        if(ALGO == POISSON_OWN_RECT) cout << "ERROR select POLY and Run RECT" << endl;
     }
     else{
-        // 0 FR; 1 Normal Clone; 2 Mixed Clone
-        ans = getPoissonMat(des, src, Rect(this->subx, this->suby, this->subw, this->subh), 1);
-        //ans = getPoissonMat(des, src, Rect(this->subx, this->suby, this->subw, this->subh), 0);
+        msk = 255 * Mat::ones(src.rows, src.cols, src.depth());
+        if(ALGO == POISSON_OWN_POLY) cout << "ERROR select RECT and Run POLY" << endl;
     }
+    /*
+     *  0 Poisson Opencv3.2 Normal Clone
+     *  1 Poisson Opencv3.2 Mixed Clone
+     *  2 Poisson Own Rect By FR Solver
+     *  3 Poisson Own Poly By FR Solver
+     *  4 Poisson Own Drag Drop Solver
+     */
+    ans = getFusionMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), ALGO);
+    //imshow("opencv",ans);
     split(ans,ans_v);
     Mat whiteC = 255 * Mat::ones(ans_v[0].rows, ans_v[0].cols, ans_v[0].depth());
     ans_v.push_back(whiteC);
