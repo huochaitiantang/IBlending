@@ -5,17 +5,8 @@
 #-------------------------------------------------
 
 INCLUDEPATH += /home/sensetime/libs/include
-#INCLUDEPATH += /home/sensetime/gradient_fusion
 
-LIBS += -L/home/sensetime/libs/lib
-# add down error!!!!
-# -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_photo -lopencv_imgcodecs
-LIBS += /home/sensetime/gradient_fusion/lmath.o \
-        /home/sensetime/gradient_fusion/poisson.o \
-        /home/sensetime/gradient_fusion/tools.o \
-        /home/sensetime/gradient_fusion/test.o \
-        /home/sensetime/gradient_fusion/api.o \
-        /home/sensetime/libs/lib/libopencv_core.so \
+LIBS += /home/sensetime/libs/lib/libopencv_core.so \
         /home/sensetime/libs/lib/libopencv_imgproc.so \
         /home/sensetime/libs/lib/libopencv_highgui.so \
         /home/sensetime/libs/lib/libopencv_imgcodecs.so \
@@ -42,14 +33,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp
+    main.cpp \
+    mainwindow.cpp \
+    util.cpp \
+    imglabel.cpp \
+    srcimglabel.cpp \
+    desimglabel.cpp \
+    editwindow.cpp \
+    editimglabel.cpp \
+    algorithms.cpp
 
 HEADERS += \
-        mainwindow.h
+    mainwindow.h \
+    util.h \
+    imglabel.h \
+    srcimglabel.h \
+    desimglabel.h \
+    editwindow.h \
+    editimglabel.h \
+    algorithms.h
 
 FORMS += \
-        mainwindow.ui
+    mainwindow.ui \
+    editwindow.ui
 
 
 
