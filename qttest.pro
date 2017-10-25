@@ -4,15 +4,16 @@
 #
 #-------------------------------------------------
 
-INCLUDEPATH += /home/sensetime/libs/include
 INCLUDEPATH += include
+INCLUDEPATH += /home/liuliang/opencv3.2/include
 
-LIBS += /home/sensetime/libs/lib/libopencv_core.so \
-        /home/sensetime/libs/lib/libopencv_imgproc.so \
-        /home/sensetime/libs/lib/libopencv_highgui.so \
-        /home/sensetime/libs/lib/libopencv_imgcodecs.so \
-        /home/sensetime/libs/lib/libopencv_photo.so \
+LIBS += -L/home/liuliang/opencv3.2/lib
 
+LIBS += /home/liuliang/opencv3.2/lib/libopencv_core.so \
+        /home/liuliang/opencv3.2/lib/libopencv_imgproc.so \
+        /home/liuliang/opencv3.2/lib/libopencv_highgui.so \
+        /home/liuliang/opencv3.2/lib/libopencv_imgcodecs.so \
+        /home/liuliang/opencv3.2/lib/libopencv_photo.so \
 
 QT       += core gui
 
@@ -57,6 +58,4 @@ HEADERS += \
 FORMS += \
     ui/mainwindow.ui \
     ui/editwindow.ui
-
-
 
