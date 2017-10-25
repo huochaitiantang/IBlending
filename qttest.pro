@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 INCLUDEPATH += /home/sensetime/libs/include
+INCLUDEPATH += include
 
 LIBS += /home/sensetime/libs/lib/libopencv_core.so \
         /home/sensetime/libs/lib/libopencv_imgproc.so \
@@ -33,29 +34,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    util.cpp \
-    imglabel.cpp \
-    srcimglabel.cpp \
-    desimglabel.cpp \
-    editwindow.cpp \
-    editimglabel.cpp \
-    algorithms.cpp
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/util.cpp \
+    src/imglabel.cpp \
+    src/srcimglabel.cpp \
+    src/desimglabel.cpp \
+    src/editwindow.cpp \
+    src/editimglabel.cpp \
+    src/algorithms.cpp
 
 HEADERS += \
-    mainwindow.h \
-    util.h \
-    imglabel.h \
-    srcimglabel.h \
-    desimglabel.h \
-    editwindow.h \
-    editimglabel.h \
-    algorithms.h
+    include/mainwindow.h \
+    include/util.h \
+    include/imglabel.h \
+    include/srcimglabel.h \
+    include/desimglabel.h \
+    include/editwindow.h \
+    include/editimglabel.h \
+    include/algorithms.h
 
 FORMS += \
-    mainwindow.ui \
-    editwindow.ui
+    ui/mainwindow.ui \
+    ui/editwindow.ui
 
 
 
