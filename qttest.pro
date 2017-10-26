@@ -3,17 +3,17 @@
 # Project created by QtCreator 2017-07-22T20:57:02
 #
 #-------------------------------------------------
+OPENCV_DIR = /home/sensetime/libs
 
 INCLUDEPATH += include
-INCLUDEPATH += /home/liuliang/opencv3.2/include
+INCLUDEPATH += $$OPENCV_DIR/include
 
-LIBS += -L/home/liuliang/opencv3.2/lib
-
-LIBS += /home/liuliang/opencv3.2/lib/libopencv_core.so \
-        /home/liuliang/opencv3.2/lib/libopencv_imgproc.so \
-        /home/liuliang/opencv3.2/lib/libopencv_highgui.so \
-        /home/liuliang/opencv3.2/lib/libopencv_imgcodecs.so \
-        /home/liuliang/opencv3.2/lib/libopencv_photo.so \
+LIBS += -L$$OPENCV_DIR/lib
+LIBS += $$OPENCV_DIR/lib/libopencv_core.so \
+        $$OPENCV_DIR/lib/libopencv_imgproc.so \
+        $$OPENCV_DIR/lib/libopencv_highgui.so \
+        $$OPENCV_DIR/lib/libopencv_imgcodecs.so \
+        $$OPENCV_DIR/lib/libopencv_photo.so \
 
 QT       += core gui
 
