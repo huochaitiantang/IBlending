@@ -8,6 +8,8 @@ For Image Blending
 
 ## Compile
 * Before compiling, please modify the variable 'OPENCV_DIR' in qttest.pro
-* ```qmake```
+* ```mkdir build```
+* ```cd build```
+* ```qmake ..```
 * ```make```
 * ```./IBlending```
