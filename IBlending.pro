@@ -35,15 +35,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    src/main.cpp \
-    src/mainwindow.cpp \
-    src/util.cpp \
-    src/imglabel.cpp \
-    src/srcimglabel.cpp \
-    src/desimglabel.cpp \
-    src/editwindow.cpp \
-    src/editimglabel.cpp \
-    src/algorithms.cpp
+    src/frontend/main.cpp \
+    src/frontend/mainwindow.cpp \
+    src/frontend/util.cpp \
+    src/frontend/imglabel.cpp \
+    src/frontend/srcimglabel.cpp \
+    src/frontend/desimglabel.cpp \
+    src/frontend/editwindow.cpp \
+    src/frontend/editimglabel.cpp \
+    src/backend/api.cpp \
+    src/backend/tools.cpp \
+    src/backend/solve_equation.cpp \
+    src/backend/poisson_rect.cpp \
+    src/backend/poisson_poly.cpp \
+    src/backend/drag_drop.cpp
+
 
 HEADERS += \
     include/mainwindow.h \

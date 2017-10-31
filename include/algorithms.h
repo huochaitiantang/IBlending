@@ -18,19 +18,12 @@ using namespace std;
 //api.cpp
 Mat getFusionMat(const Mat &back, const Mat &front, const Mat &mask, Rect b_roi, int type);
 
-//poisson.cpp
-int get_ind(int i, int j, int w);
-void getA(Mat &A, int h, int w);
-vector< vector< int > >  get_sparseA(int h, int w);
-void getB( Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &B);
-void poisson(Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &ans);
-void getMaskMapTable(Mat &Mask, Rect roi, vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap);
-void polygonPoisson(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat &ans);
-void getPolyB( Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &B, vector<vector<int> > &MapId, vector<pair<int,int> > &IdMap);
-vector<vector<int> > getPolySparseA( vector<vector<int> > &MapId, vector<pair<int,int> > &IdMap);
-void edgePoisson(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat &ans);
+//tools.cpp
+int print_mat_info(Mat mat, const char* s);
+void simple_replace(const Mat& obj, Point pt, const Mat &src, Rect roi, Mat& ans);
+bool valid_roi(const Mat& img, Rect roi);
 
-//lmath.cpp
+//solve_equation.cpp
 void get_a(Mat &a, int w);
 double cal_a_det(int n);
 void print_float_mat(Mat m);
@@ -41,9 +34,21 @@ Mat cal_Ap( int rw, int rh, Mat &p );
 void solve_FR_SparseA( int rw, int rh, Mat &b, Mat &ans, double delta );
 void solve_FR_PolySparseA( int rw, int rh, Mat &b, vector<vector<int> > &A, Mat &ans, double delta );
 
-//tools.cpp
-int print_mat_info(Mat mat, const char* s);
-void simple_replace(const Mat& obj, Point pt, const Mat &src, Rect roi, Mat& ans);
-bool valid_roi(const Mat& img, Rect roi);
+//poisson_rect.cpp
+int get_ind(int i, int j, int w);
+void getA(Mat &A, int h, int w);
+vector< vector< int > >  get_sparseA(int h, int w);
+void getB( Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &B);
+void poisson(Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &ans);
+
+//poisson_poly.cpp
+void getMaskMapTable(Mat &Mask, Rect roi, vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap);
+void polygonPoisson(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat &ans);
+void getPolyB( Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &B, vector<vector<int> > &MapId, vector<pair<int,int> > &IdMap);
+vector<vector<int> > getPolySparseA( vector<vector<int> > &MapId, vector<pair<int,int> > &IdMap);
+
+//drag_drop.cpp
+void dragDrop(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat &ans);
+
 
 #endif // ALGORITHMS_H
