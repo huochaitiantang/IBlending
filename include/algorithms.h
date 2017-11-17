@@ -48,6 +48,8 @@ void getPolyB( Mat &img_front, Mat &img_back, Rect roi, Point pt, Mat &B, vector
 vector<vector<int> > getPolySparseA( vector<vector<int> > &MapId, vector<pair<int,int> > &IdMap);
 
 //drag_drop.cpp
+void getBandMask(Mat &img_front, Mat &mask, Mat &edge_mask, Mat &obj_mask);
+void getMaskBoundary(Mat &mask, vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap, vector<pair<int,int> > &BoundaryIdMap);
 void dragDrop(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat &ans);
 
 
