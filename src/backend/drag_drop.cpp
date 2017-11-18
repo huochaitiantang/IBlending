@@ -9,7 +9,9 @@
      int rh = img_front.rows;
      int rw = img_front.cols;
      Mat grab_mask, bgdModel, fgdModel;
-     mask.copyTo(grab_mask);
+     Mat mask_8uc1;
+     mask.convertTo(mask_8uc1,CV_8UC1);
+     mask_8uc1.copyTo(grab_mask);
      for(int i = 0; i < rh; i++){
          uchar * Ptr = grab_mask.ptr<uchar>(i);
          for(int j = 0; j < rw; j++){
@@ -40,6 +42,8 @@
              }
          }
      }
+     edge_mask.convertTo(edge_mask,CV_64FC1);
+     obj_mask.convertTo(obj_mask,CV_64FC1);
  }
 
 /*
@@ -49,33 +53,39 @@ void getMaskBoundary(vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap
     int h = MapId.size();
     int w = MapId[0].size();
     BoundaryIdMap.clear();
+    vector<vector<bool> > flag;
+    for(int i = 0; i < h; i++){
+        vector<bool> cur;
+        for(int j = 0; j < w; j++){
+            cur.push_back(false);
+        }
+        flag.push_back(cur);
+    }
     for(int i = 0; i < IdMap.size(); i++){
         int x = IdMap[i].first;
         int y = IdMap[i].second;
-        if(x == 0 || y == 0 || x == h - 1 || y == w -1){
+        if(x == 0 || y == 0 || x == h - 1 || y == w -1||
+           MapId[x-1][y] == -1 || MapId[x+1][y] == -1 ||
+           MapId[x][y-1] == -1 || MapId[x][y+1] == -1){
             pair<int,int> p(x,y);
             BoundaryIdMap.push_back(p);
+            flag[x][y] = true;
         }
-        else if(MapId[x-1][y] == -1 || MapId[x+1][y] == -1 ||
-                MapId[x][y-1] == -1 || MapId[x][y+1] == -1){
-            pair<int,int> p(x,y);
-            BoundaryIdMap.push_back(p);
-        }
+    }
+    for(int k = 0; k < IdMap.size(); k++){
+        int i = IdMap[k].first;
+        int j = IdMap[k].second;
+        if(flag[i][j]) continue;
+        if(    (flag[i-1][j] && flag[i][j+1] && !flag[i-1][j+1])||
+               (flag[i][j+1] && flag[i+1][j] && !flag[i+1][j+1])||
+               (flag[i+1][j] && flag[i][j-1] && !flag[i+1][j-1])||
+               (flag[i][j-1] && flag[i-1][j] && !flag[i-1][j-1])){
+                pair<int,int> p(i,j);
+                BoundaryIdMap.push_back(p);
+         }
     }
     int siz = BoundaryIdMap.size();
     cout << "Boundary Num:" << siz << endl;
-    for(int j = 0; j < h; j++){
-    for(int k = 0; k < w; k++){
-    	int i;
-	for(i = 0; i < siz; i++){
-    		if(j == BoundaryIdMap[i].first && k == BoundaryIdMap[i].second) break;
-    	}
-	if(i < siz) cout << "*";
-	else cout << " ";
-    }
-    cout << endl;
-	}
-
 }
 
 /* dragDrop(drag and drop not implementation)
@@ -95,9 +105,17 @@ void dragDrop(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt, Mat 
     vector<vector<int> > MapId;
     vector<pair<int,int> > IdMap;
     vector<pair<int,int> > BoundaryIdMap;
+    vector<pair<int,int> > objBoundaryIdMap;
+
     getMaskMapTable(mask,roi,MapId,IdMap);
     getMaskBoundary(MapId, IdMap, BoundaryIdMap);
 
+    getMaskMapTable(obj_mask,roi,MapId,IdMap);
+    getMaskBoundary(MapId, IdMap, objBoundaryIdMap);
+
+    getMaskMapTable(edge_mask,roi,MapId,IdMap);
+    test_IdMap_MapId(MapId,BoundaryIdMap);
+    test_IdMap_MapId(MapId,objBoundaryIdMap);
 
 
     //Mat new_back, s_new_back, new_front;

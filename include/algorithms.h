@@ -22,6 +22,7 @@ Mat getFusionMat(const Mat &back, const Mat &front, const Mat &mask, Rect b_roi,
 int print_mat_info(Mat mat, const char* s);
 void simple_replace(const Mat& obj, Point pt, const Mat &src, Rect roi, Mat& ans);
 bool valid_roi(const Mat& img, Rect roi);
+void test_IdMap_MapId(vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap);
 
 //solve_equation.cpp
 void get_a(Mat &a, int w);

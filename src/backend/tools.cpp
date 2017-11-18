@@ -51,3 +51,36 @@ bool valid_roi(const Mat& img, Rect roi){
         roi.y + roi.height > img.rows ) return false;
     else return true;
 }
+
+
+/*
+ * Draw the IdMap and MapId
+ */
+void test_IdMap_MapId(vector<vector<int> > & MapId, vector<pair<int,int> > &IdMap){
+    cout << "-------------------Test-------------------------" << endl;
+    int rh = MapId.size();
+    int rw = MapId[0].size();
+    vector<string> test_pic;
+    for(int i = 0; i < rh; i++){
+        string s = "";
+        for(int j = 0; j < rw; j++){
+            s += " ";
+        }
+        s += "|\n";
+        test_pic.push_back(s);
+    }
+    for(int i = 0; i < rh; i++){
+        for(int j = 0; j < rw; j++){
+            if(MapId[i][j] >=0 ){
+                test_pic[i][j] = '*';
+            }
+        }
+    }
+    for(int i = 0; i < rh; i++) cout << test_pic[i];
+    for(int i = 0; i < IdMap.size(); i++){
+        test_pic[IdMap[i].first][IdMap[i].second] = '#';
+    }
+    for(int i = 0; i < rh; i++) cout << test_pic[i];
+    cout << "-------------------End-------------------------" << endl;
+
+}

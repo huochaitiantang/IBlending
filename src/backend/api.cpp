@@ -44,7 +44,8 @@ Mat getFusionMat(const Mat &back, const Mat &front, const Mat &mask, Rect b_roi,
         cout << "Poisson Own Drag Drop Solver" << endl;
         Mat res, msk, in1, in2;
         vector<Mat> msk_v;
-        split(mask,msk_v);
+        mask.convertTo(msk, CV_64FC3);
+        split(msk,msk_v);
         msk = msk_v[0];
         in1 = back;
         in2 = front;
