@@ -17,10 +17,15 @@ Mat getFusionMat(const Mat &back, const Mat &front, const Mat &mask, Rect b_roi,
         cout << "Poisson Opencv3.2 Mixed Clone " << endl;
         seamlessClone( front, back, mask, center, ans, MIXED_CLONE );
     }
-    else if(type == 2 || type == 3){
+    else if(type == 2 || type == 3 || type == 5){
         Mat res, in1, in2, msk;
+        Mat back_with_border;
         vector<Mat> msk_v;
-        back.convertTo(in1, CV_64FC3);
+        //add border
+        copyMakeBorder(back, back_with_border, 1, 1, 1, 1, BORDER_REPLICATE, Scalar(1,1,1));
+        //imshow("back",back);
+        //imshow("back-border",back_with_border);
+        back_with_border.convertTo(in1, CV_64FC3);
         front.convertTo(in2, CV_64FC3);
         mask.convertTo(msk, CV_64FC3);
         split(msk,msk_v);
@@ -28,13 +33,18 @@ Mat getFusionMat(const Mat &back, const Mat &front, const Mat &mask, Rect b_roi,
         print_mat_info( in1, "background" );
         print_mat_info( in2, "roi_front" );
         print_mat_info( msk, "mask" );
+        Point tl_with_border = Point(b_roi.x + 1, b_roi.y + 1);
         if(type == 2){
             cout << "Poisson Own Rect ROI By FR Solver " << endl;
-            poisson(in2, in1, roi, b_roi.tl(), res);
+            poisson(in2, in1, roi, tl_with_border, res);
         }
-        else{
+        else if(type == 3){
             cout << "Poisson Own Poly ROI By FR Solver " << endl;
-            polygonPoisson(in2, in1, msk, roi, b_roi.tl(), res);
+            polygonPoisson(in2, in1, msk, roi, tl_with_border, res);
+        }
+        else {
+            cout << "Poisson By FR Solver " << endl;
+            poissonFR(in2, in1, msk, roi, tl_with_border, res);
         }
         res.convertTo(res, CV_8UC3);
         Mat roimat = ans(b_roi);

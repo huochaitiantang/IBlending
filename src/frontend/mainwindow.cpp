@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->fusion_way->addItem("POISSON_OWN_RECT");
     this->ui->fusion_way->addItem("POISSON_OWN_POLY");
     this->ui->fusion_way->addItem("POISSON_OWN_DRAG");
+    this->ui->fusion_way->addItem("POISSON_FR");
     connect(this->ui->fusion_way, SIGNAL(currentIndexChanged(int)), this, SLOT(switch_fusion_way()));
 
     srcimglabel->poly = createPolygon();
@@ -180,6 +181,7 @@ void MainWindow::switch_fusion_way(){
     else if(ind == 2 && srcimglabel->SELECT_WAY == RECT) desimglabel->ALGO = POISSON_OWN_RECT;
     else if(ind == 3 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_POLY;
     else if(ind == 4 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_DRAG;
+    else if(ind == 5) desimglabel->ALGO = POISSON_FR;
     else desimglabel->ALGO = POISSON_OPENCV_NORMAL;
     // make sure that own_poly and own_drag not match with rect select way,
     // own_rect not match with poly select way

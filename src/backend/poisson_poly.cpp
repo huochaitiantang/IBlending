@@ -149,7 +149,7 @@ void polygonPoisson(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt
     A = getPolySparseA(MapId, IdMap);
     start = time(NULL);
     for(int k = 0; k < img_back.channels(); k++){
-        cout << " For rgb[" << k << "]..." << endl;
+        //cout << " For rgb[" << k << "]..." << endl;
         getPolyB(rgb_f[k], rgb_b[k], roi, pt, B, MapId, IdMap);
         Mat res;
         Mat res_rect = Mat::zeros(rh, rw, CV_64FC1);
@@ -157,7 +157,7 @@ void polygonPoisson(Mat &img_front, Mat &img_back, Mat &mask, Rect roi, Point pt
         long t0 = time(NULL);
         solve_FR_PolySparseA(rw, rh, B, A, res, delta );
         long t1 = time(NULL);
-        cout << "\tCost " << (t1 - t0) * 1000 << " ms.\n" << endl;
+        //cout << "\tCost " << (t1 - t0) * 1000 << " ms.\n" << endl;
         for(int i = 0; i < rh; i++){
             double * Ptr = res_rect.ptr<double>(i);
             for(int j = 0; j < rw; j++){

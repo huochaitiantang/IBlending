@@ -3,7 +3,7 @@
 # Project created by QtCreator 2017-07-22T20:57:02
 #
 #-------------------------------------------------
-OPENCV_DIR = /home/sensetime/libs
+OPENCV_DIR = /home/liuliang/opencv3.2
 
 INCLUDEPATH += include
 INCLUDEPATH += $$OPENCV_DIR/include
@@ -48,7 +48,8 @@ SOURCES += \
     src/backend/solve_equation.cpp \
     src/backend/poisson_rect.cpp \
     src/backend/poisson_poly.cpp \
-    src/backend/drag_drop.cpp
+    src/backend/drag_drop.cpp \
+    src/backend/poisson_fr.cpp
 
 
 HEADERS += \
@@ -59,7 +60,8 @@ HEADERS += \
     include/desimglabel.h \
     include/editwindow.h \
     include/editimglabel.h \
-    include/algorithms.h
+    include/algorithms.h \
+    src/backend/poisson_fr.h
 
 FORMS += \
     ui/mainwindow.ui \

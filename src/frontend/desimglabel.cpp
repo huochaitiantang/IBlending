@@ -37,7 +37,9 @@ void DesImgLabel::poisson(){
      *  3 Poisson Own Poly By FR Solver
      *  4 Poisson Own Drag Drop Solver
      */
-    ans = getFusionMat(des, src, msk, Rect(this->subx, this->suby, this->subw, this->subh), ALGO);
+    ans = getFusionMat(des, src, msk,
+                       Rect(this->subx, this->suby, this->subw, this->subh),
+                       ALGO);
     //imshow("opencv",ans);
     split(ans,ans_v);
     Mat whiteC = 255 * Mat::ones(ans_v[0].rows, ans_v[0].cols, ans_v[0].depth());

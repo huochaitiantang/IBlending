@@ -21,7 +21,8 @@ typedef enum algo{
     POISSON_OPENCV_MIXED,
     POISSON_OWN_RECT,
     POISSON_OWN_POLY,
-    POISSON_OWN_DRAG
+    POISSON_OWN_DRAG,
+    POISSON_FR
 
 } algorithm_e;
 
