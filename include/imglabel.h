@@ -17,13 +17,9 @@ typedef enum sw{
 } select_way_e;
 
 typedef enum algo{
+    POISSON_FR,
+    POISSON_DRAG,
     POISSON_OPENCV_NORMAL,
-    POISSON_OPENCV_MIXED,
-    POISSON_OWN_RECT,
-    POISSON_OWN_POLY,
-    POISSON_OWN_DRAG,
-    POISSON_FR
-
 } algorithm_e;
 
 class ImgLabel : public QLabel

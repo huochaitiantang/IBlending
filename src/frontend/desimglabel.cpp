@@ -24,18 +24,15 @@ void DesImgLabel::poisson(){
         split(msk,msk_v);
         if(msk_v.size() == 4) msk_v.pop_back();
         merge(msk_v, msk);
-        if(ALGO == POISSON_OWN_RECT) cout << "ERROR select POLY and Run RECT" << endl;
+        //if(ALGO == POISSON_OWN_RECT) cout << "ERROR select POLY and Run RECT" << endl;
     }
     else{
         msk = 255 * Mat::ones(src.rows, src.cols, src.depth());
-        if(ALGO == POISSON_OWN_POLY) cout << "ERROR select RECT and Run POLY" << endl;
+        //if(ALGO == POISSON_OWN_POLY) cout << "ERROR select RECT and Run POLY" << endl;
     }
     /*
-     *  0 Poisson Opencv3.2 Normal Clone
-     *  1 Poisson Opencv3.2 Mixed Clone
-     *  2 Poisson Own Rect By FR Solver
-     *  3 Poisson Own Poly By FR Solver
-     *  4 Poisson Own Drag Drop Solver
+     *  0 Poisson Own Rect Poly By FR Solver
+     *  1 Poisson Own Drag Drop Solver
      */
     ans = getFusionMat(des, src, msk,
                        Rect(this->subx, this->suby, this->subw, this->subh),

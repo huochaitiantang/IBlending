@@ -60,8 +60,7 @@ HEADERS += \
     include/desimglabel.h \
     include/editwindow.h \
     include/editimglabel.h \
-    include/algorithms.h \
-    src/backend/poisson_fr.h
+    include/algorithms.h
 
 FORMS += \
     ui/mainwindow.ui \

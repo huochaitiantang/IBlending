@@ -20,14 +20,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->poly, SIGNAL(clicked()), this, SLOT(on_poly_clicked()));
     connect(ui->rect, SIGNAL(clicked()), this, SLOT(on_rect_clicked()));
 
-    this->ui->fusion_way->addItem("POISSON_OPENCV_NORMAL");
-    this->ui->fusion_way->addItem("POISSON_OPENCV_MIXED");
-    this->ui->fusion_way->addItem("POISSON_OWN_RECT");
-    this->ui->fusion_way->addItem("POISSON_OWN_POLY");
-    this->ui->fusion_way->addItem("POISSON_OWN_DRAG");
+    //this->ui->fusion_way->addItem("POISSON_OPENCV_NORMAL");
+    //this->ui->fusion_way->addItem("POISSON_OPENCV_MIXED");
+    //this->ui->fusion_way->addItem("POISSON_OWN_RECT");
+    //this->ui->fusion_way->addItem("POISSON_OWN_POLY");
     this->ui->fusion_way->addItem("POISSON_FR");
+    this->ui->fusion_way->addItem("POISSON_DRAG");
+    //this->ui->fusion_way->addItem("-");
+    //this->ui->fusion_way->addItem("POISSON_Fast");
     connect(this->ui->fusion_way, SIGNAL(currentIndexChanged(int)), this, SLOT(switch_fusion_way()));
-
+    ui->fusion_way->setCurrentIndex(0);
+    //cout << "init:" << ui->fusion_way->currentIndex();
     srcimglabel->poly = createPolygon();
 }
 
@@ -177,18 +180,20 @@ void MainWindow::on_poly_clicked(){
 
 void MainWindow::switch_fusion_way(){
     int ind = ui->fusion_way->currentIndex();
-    if(ind == 1) desimglabel->ALGO = POISSON_OPENCV_MIXED;
-    else if(ind == 2 && srcimglabel->SELECT_WAY == RECT) desimglabel->ALGO = POISSON_OWN_RECT;
-    else if(ind == 3 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_POLY;
-    else if(ind == 4 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_DRAG;
-    else if(ind == 5) desimglabel->ALGO = POISSON_FR;
+    if(ind == 0) desimglabel->ALGO = POISSON_FR;
+    else if(ind == 1) desimglabel->ALGO = POISSON_DRAG;
+    //else if(ind == 2 && srcimglabel->SELECT_WAY == RECT) desimglabel->ALGO = POISSON_OWN_RECT;
+    //else if(ind == 3 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_POLY;
+    //else if(ind == 4 && srcimglabel->SELECT_WAY == POLY) desimglabel->ALGO = POISSON_OWN_DRAG;
+    //else if(ind == 5) desimglabel->ALGO = POISSON_FR;
+    //else if(ind == 6) desimglabel->ALGO = POISSON_Fast;
     else desimglabel->ALGO = POISSON_OPENCV_NORMAL;
     // make sure that own_poly and own_drag not match with rect select way,
     // own_rect not match with poly select way
-    if(   (ind == 2 && srcimglabel->SELECT_WAY != RECT)
-       || (ind == 3 && srcimglabel->SELECT_WAY != POLY)
-       || (ind == 4 && srcimglabel->SELECT_WAY != POLY) )
-        ui->fusion_way->setCurrentIndex(0);
+    //if(   (ind == 2 && srcimglabel->SELECT_WAY != RECT)
+    //   || (ind == 3 && srcimglabel->SELECT_WAY != POLY)
+    //  || (ind == 4 && srcimglabel->SELECT_WAY != POLY) )
+    //    ui->fusion_way->setCurrentIndex(0);
     QByteArray ba(ui->fusion_way->currentText().toAscii());
     cout << "Change FUSION_WAY : " << ind << " : "<< ba.data() << endl;
 }
